@@ -1,0 +1,15 @@
+sudo: required
+dist: trusty
+language: python
+python:
+    - 2.7
+    - 3.4
+
+script:
+    - sudo pip install pytest-cov
+    - py.test --cov=cif --cov-fail-under=65
+
+notifications:
+    email:
+        on_success: never
+        on_failure: never
