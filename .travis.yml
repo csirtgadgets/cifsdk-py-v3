@@ -7,7 +7,7 @@ python:
 
 script:
     - sudo pip install pytest-cov
-    - py.test --cov=cif --cov-fail-under=65
+    - py.test --cov=cifsdk --cov-fail-under=65
 
 notifications:
     email:
