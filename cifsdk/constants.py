@@ -15,7 +15,9 @@ LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
 LOGLEVEL = 'INFO'
 LOGLEVEL = os.environ.get('CIF_LOGLEVEL', LOGLEVEL).upper()
 
-CONFIG_PATH = os.environ.get('CIF_CONFIG_PATH', os.path.join(os.path.expanduser('~/'), '.cif.yml'))
+CONFIG_PATH = os.environ.get('CIF_CONFIG_PATH', os.path.join(os.getcwd(), 'cif.yml'))
+if not os.path.isfile(CONFIG_PATH):
+    CONFIG_PATH = os.path.join(os.path.expanduser('~'), '.cif.yml')
 
 # address stuff
 

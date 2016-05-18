@@ -69,7 +69,7 @@ class ZMQ(Client):
             return self._send('ping')
 
     def indicator_search(self, filters):
-        rv = self._send('indicator_search', json.dumps(filters))
+        rv = self._send('indicators_search', json.dumps(filters))
         return rv
 
     def indicator_create(self, data):

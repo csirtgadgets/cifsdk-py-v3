@@ -32,7 +32,7 @@ setup(
     scripts=[],
     entry_points={
         'console_scripts': [
-            'cif=cif.client:main',
+            'cif=cifsdk.client:main',
         ]
     },
 )

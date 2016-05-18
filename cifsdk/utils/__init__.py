@@ -72,3 +72,6 @@ def setup_signals(name):
     signal.signal(signal.SIGTERM, sigterm_handler)
 
 
+def setup_runtime_path(path):
+    if not os.path.isdir(path):
+        os.mkdir(path)
