@@ -1,3 +1,4 @@
+-e git+https://github.com/csirtgadgets/csirtg-indicator-py.git@3c547c0524e2eca59383db5d144a2e3e53dd4953#egg=csirtg_indicator
 pytest-cov>=2.2.1
 ipaddress>=1.0.16
 ipaddr>=2.1.11
