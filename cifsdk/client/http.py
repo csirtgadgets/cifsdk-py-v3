@@ -5,7 +5,7 @@ import json
 from cifsdk.exceptions import AuthError
 from pprint import pprint
 
-from cifsdk.client import Client
+from cifsdk.client.plugin import Client
 
 
 class HTTP(Client):

@@ -1,11 +1,15 @@
 import py.test
 
-from cifsdk.client import Client
 
-
-def test_cli():
+def test_client_dummy():
+    from cifsdk.client.dummy import Dummy as Client
     cli = Client('https://localhost:3000', 12345)
     assert cli.remote == 'https://localhost:3000'
 
-    from pprint import pprint
-    pprint(cli)
+    data = {
+        'indicator': 'example.com',
+        'tags': ['botnet']
+    }
+    assert cli.indicator_create(data)
+
+    assert cli.indicator_search(data)

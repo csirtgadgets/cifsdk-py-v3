@@ -1,6 +1,6 @@
 import py.test
 
-from cifsdk.client.http import Client
+from cifsdk.client.http import HTTP as Client
 
 
 def test_client_http():
