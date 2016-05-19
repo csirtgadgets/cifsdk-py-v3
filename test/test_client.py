@@ -15,5 +15,3 @@ def test_client_dummy():
 
     assert cli.indicators_search(data)
 
-    x = subprocess.call(['cif', '-h'])
-    assert x == 0
