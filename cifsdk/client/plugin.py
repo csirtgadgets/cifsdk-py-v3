@@ -13,7 +13,8 @@ class Client(object):
     def _kv_to_indicator(self, kv):
         return Indicator(**kv)
 
-    def ping(self):
+    @abc.abstractmethod
+    def ping(self, write=False):
         raise NotImplementedError
 
     def search(self, data):

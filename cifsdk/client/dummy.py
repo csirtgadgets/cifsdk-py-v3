@@ -8,6 +8,9 @@ class Dummy(Client):
         self.remote = remote
         self.token = token
 
+    def ping(self, write=False):
+        return True
+
     def indicator_create(self, data):
         if isinstance(data, dict):
             data = self._kv_to_indicator(data)
