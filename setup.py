@@ -33,6 +33,7 @@ setup(
     entry_points={
         'console_scripts': [
             'cif=cifsdk.client:main',
+            'cif-tokens=cifsdk.client.tokens:main',
         ]
     },
 )

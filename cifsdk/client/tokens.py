@@ -17,8 +17,6 @@ TOKEN = os.environ.get('CIF_TOKEN', None)
 COLS = os.environ.get('CIF_TOKEN_COLUMNS', ['username', 'groups', 'last_activity_at', 'admin', 'read', 'write', 'acl',
                                             'expires', 'token'])
 
-CONFIG = os.environ.get('CIF_CONFIG', os.path.join(os.path.expanduser('~/'), '.cif.yml'))
-
 
 def main():
     p = get_argument_parser()
@@ -79,7 +77,7 @@ def main():
 
     options = vars(args)
 
-    from cif.client.http import HTTP as HTTPClient
+    from cifsdk.client.http import HTTP as HTTPClient
     cli = HTTPClient(args.remote, args.token, verify_ssl=verify_ssl)
 
     rv = False
