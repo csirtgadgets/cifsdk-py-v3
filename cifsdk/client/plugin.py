@@ -18,12 +18,12 @@ class Client(object):
         raise NotImplementedError
 
     def search(self, data):
-        return self.indicator_search(data)
+        return self.indicators_search(data)
 
     @abc.abstractmethod
-    def indicator_create(self, data):
+    def indicators_create(self, data):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def indicator_search(self, data):
+    def indicators_search(self, data):
         raise NotImplementedError

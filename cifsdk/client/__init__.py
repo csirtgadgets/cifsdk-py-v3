@@ -116,7 +116,7 @@ def main():
     elif options.get('search'):
         logger.info("searching for {0}".format(options.get("search")))
         try:
-            rv = cli.indicator_search({
+            rv = cli.indicators_search({
                     'indicator': options['search'],
                     'limit': options['limit'],
                     'nolog': options['nolog']

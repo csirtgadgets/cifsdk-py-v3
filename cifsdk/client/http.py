@@ -128,11 +128,11 @@ class HTTP(Client):
         body = json.loads(body.content)
         return body
 
-    def indicator_search(self, filters):
+    def indicators_search(self, filters):
         rv = self._get('/search', params=filters)
         return rv['data']
 
-    def indicator_create(self, data):
+    def indicators_create(self, data):
         data = str(data)
 
         uri = "{0}/indicators".format(self.remote)
@@ -168,8 +168,8 @@ class HTTP(Client):
         rv = self._post('{}/tokens'.format(self.remote), data)
         return rv['data']
 
-    def token_edit(self, data):
-        rv = self._patch('{}/token'.format(self.remote), data)
+    def tokens_edit(self, data):
+        rv = self._patch('{}/tokens'.format(self.remote), data)
         return rv['data']
 
 Plugin = HTTP

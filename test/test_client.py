@@ -1,4 +1,5 @@
 import py.test
+import subprocess
 
 
 def test_client_dummy():
@@ -10,6 +11,9 @@ def test_client_dummy():
         'indicator': 'example.com',
         'tags': ['botnet']
     }
-    assert cli.indicator_create(data)
+    assert cli.indicators_create(data)
 
-    assert cli.indicator_search(data)
+    assert cli.indicators_search(data)
+
+    x = subprocess.call(['cif', '-h'])
+    assert x == 0

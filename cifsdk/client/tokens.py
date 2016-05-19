@@ -154,7 +154,7 @@ def main():
 
         groups = options['groups'].split(',')
 
-        rv = cli.token_edit({
+        rv = cli.tokens_edit({
             'token': options['update'],
             'groups': groups
         })

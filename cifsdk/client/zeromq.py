@@ -68,11 +68,11 @@ class ZMQ(Client):
         else:
             return self._send('ping')
 
-    def indicator_search(self, filters):
+    def indicators_search(self, filters):
         rv = self._send('indicators_search', json.dumps(filters))
         return rv
 
-    def indicator_create(self, data):
+    def indicators_create(self, data):
         if isinstance(data, dict):
             data = self._kv_to_indicator(data)
 
@@ -101,7 +101,7 @@ class ZMQ(Client):
     def tokens_delete(self, data):
         return self._send('tokens_delete', data)
 
-    def token_edit(self, data):
-        return self._send('token_edit', data)
+    def tokens_edit(self, data):
+        return self._send('tokens_edit', data)
 
 Plugin = ZMQ
