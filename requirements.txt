@@ -1,13 +1,8 @@
--e git+https://github.com/csirtgadgets/csirtg-indicator-py.git@3c547c0524e2eca59383db5d144a2e3e53dd4953#egg=csirtg_indicator
-pytest-cov>=2.2.1
-ipaddress>=1.0.16
+https://github.com/csirtgadgets/csirtg-indicator-py/archive/v0.0.1.tar.gz
 ipaddr>=2.1.11
 PyYAML>=3.11
 prettytable>=0.7.2
 pyaml>=15.03.1
-pytricia>=0.9.0
 pyzmq==14.7.0
 requests>=2.6.0
 urllib3>=1.10.2
-pytest>=2.8.0
-arrow>=0.6.0

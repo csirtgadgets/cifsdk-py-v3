@@ -14,7 +14,7 @@ setup(
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description="CIFv3 SDK",
-    long_description="",
+    long_description="Software Development Kit for CIFv3",
     url="https://github.com/csirtgadgets/bearded-avenger-sdk",
     license='LGPL3',
     classifiers=[
