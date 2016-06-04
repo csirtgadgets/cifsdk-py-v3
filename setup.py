@@ -6,9 +6,6 @@ import versioneer
 if os.environ.get('USER') == 'vagrant' or os.path.isdir('/vagrant'):
     del os.link
 
-with open('requirements.txt') as f:
-    reqs = f.read().splitlines()
-
 setup(
     name="cifsdk",
     version=versioneer.get_version(),
@@ -28,7 +25,15 @@ setup(
     author="Wes Young",
     author_email="wes@csirtgadgets.org",
     packages=find_packages(),
-    install_requires=reqs,
+    install_requires=[
+        'ipaddr>=2.1.11',
+        'PyYAML>=3.11',
+        'prettytable>=0.7.2',
+        'pyaml>=15.03.1',
+        'pyzmq==14.7.0',
+        'requests>=2.6.0',
+        'urllib3>=1.10.2',
+    ],
     scripts=[],
     entry_points={
         'console_scripts': [
