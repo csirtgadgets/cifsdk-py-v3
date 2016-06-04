@@ -1,4 +1,4 @@
-https://github.com/csirtgadgets/csirtg-indicator-py/archive/v0.0.1.tar.gz
+https://github.com/csirtgadgets/csirtg-indicator-py/archive/0.0.0a0.tar.gz
 ipaddr>=2.1.11
 PyYAML>=3.11
 prettytable>=0.7.2
