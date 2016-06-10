@@ -12,6 +12,7 @@ from cifsdk.exceptions import AuthError
 from prettytable import PrettyTable
 import arrow
 import yaml
+from pprint import pprint
 
 TOKEN = os.environ.get('CIF_TOKEN', None)
 COLS = os.environ.get('CIF_TOKEN_COLUMNS', ['username', 'groups', 'last_activity_at', 'admin', 'read', 'write', 'acl',
@@ -190,13 +191,15 @@ def main():
             for r in rv:
                 l = []
                 for c in args.columns.split(','):
-                    if c == 'last_activity_at' and r[c] is not None:
+                    if c == 'last_activity_at' and r.get(c) is not None:
                         r[c] = arrow.get(r[c]).format('YYYY-MM-DDTHH:MM:ss')
                         r[c] = '{}Z'.format(r[c])
-                    if c == 'expires' and r[c] is not None:
+                    if c == 'expires' and r.get(c) is not None:
                         r[c] = arrow.get(r[c]).format('YYYY-MM-DDTHH:MM:ss')
                         r[c] = '{}Z'.format(r[c])
-                    l.append(r[c])
+                    if type(r.get(c)) == list:
+                        r[c] = ','.join(r[c])
+                    l.append(r.get(c))
                 t.add_row(l)
             print(t)
 
