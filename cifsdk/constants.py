@@ -10,7 +10,7 @@ RUNTIME_PATH = os.environ.get('CIF_RUNTIME_PATH', TEMP_DIR)
 RUNTIME_PATH = os.path.join(RUNTIME_PATH)
 
 # Logging stuff
-LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
+LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s][%(threadName)s] - %(message)s'
 
 LOGLEVEL = 'INFO'
 LOGLEVEL = os.environ.get('CIF_LOGLEVEL', LOGLEVEL).upper()

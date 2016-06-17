@@ -2,7 +2,7 @@ import logging
 import requests
 import time
 import json
-from cifsdk.exceptions import AuthError
+from cifsdk.exceptions import AuthError, TimeoutError
 from pprint import pprint
 
 from cifsdk.client.plugin import Client
@@ -37,9 +37,12 @@ class HTTP(Client):
             elif body.status_code == 404:
                 err = 'not found'
                 raise RuntimeError(err)
+            elif body.status_code == 408:
+                raise TimeoutError('timeout')
             else:
                 try:
                     err = json.loads(body.content).get('message')
+                    raise RuntimeError(err)
                 except ValueError as e:
                     err = body.content
                     self.logger.error(err)
@@ -63,6 +66,8 @@ class HTTP(Client):
             elif body.status_code == 404:
                 err = 'not found'
                 raise RuntimeError(err)
+            elif body.status_code == 408:
+                raise TimeoutError('timeout')
             else:
                 try:
                     err = json.loads(err).get('message')

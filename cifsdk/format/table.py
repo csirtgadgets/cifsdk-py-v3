@@ -13,7 +13,7 @@ class Table(object):
     def __repr__(self):
         t = PrettyTable(self.cols)
         t.align['provider'] = 'l'
-        for obs in self.data:
+        for obs in reversed(self.data):
             r = []
             for c in self.cols:
                 y = obs.get(c, '')

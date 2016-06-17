@@ -17,3 +17,7 @@ class StoreSubmissionFailed(CIFException):
 
 class AuthError(CIFException):
     pass
+
+
+class TimeoutError(CIFException):
+    pass
