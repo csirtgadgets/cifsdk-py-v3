@@ -7,9 +7,9 @@ import textwrap
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
-from cifsdk.constants import CONFIG_PATH, REMOTE_ADDR, TOKEN, SEARCH_LIMIT
+from cifsdk.constants import CONFIG_PATH, REMOTE_ADDR, TOKEN, SEARCH_LIMIT, FORMAT
 from cifsdk.exceptions import AuthError
-from cifsdk.format.table import Table
+from cifsdk.format import FORMATS
 from cifsdk.utils import setup_logging, get_argument_parser, read_config
 from csirtg_indicator import Indicator
 
@@ -44,7 +44,6 @@ def main():
         prog='cif',
         parents=[p]
     )
-
     p.add_argument('--token', help='specify api token', default=TOKEN)
     p.add_argument('--remote', help='specify API remote [default %(default)s]', default=REMOTE_ADDR)
     p.add_argument('-p', '--ping', action="store_true") # meg?
@@ -53,6 +52,7 @@ def main():
     p.add_argument("--submit", action="store_true", help="submit an indicator")
     p.add_argument('--limit', help='limit results [default %(default)s]', default=SEARCH_LIMIT)
     p.add_argument('-n', '--nolog', help='do not log search', action='store_true')
+    p.add_argument('-f', '--format', help='specify output format [default: %(default)s]"', default=FORMAT, choices=FORMATS.keys())
 
     p.add_argument('--indicator')
     p.add_argument('--tags', nargs='+')
@@ -112,7 +112,7 @@ def main():
             traceback.print_exc()
             logger.error(e)
         else:
-            print(Table(data=rv))
+            print(FORMATS[options.get('format')](data=rv))
     elif options.get('search'):
         logger.info("searching for {0}".format(options.get("search")))
         try:
@@ -129,7 +129,7 @@ def main():
         except AuthError as e:
             logger.error('unauthorized')
         else:
-            print(Table(data=rv))
+            print(FORMATS[options.get('format')](data=rv))
     elif options.get("submit"):
         logger.info("submitting {0}".format(options.get("submit")))
 
