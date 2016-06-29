@@ -21,3 +21,6 @@ class AuthError(CIFException):
 
 class TimeoutError(CIFException):
     pass
+
+class InvalidSearch(CIFException):
+    pass

@@ -1,5 +1,6 @@
 from prettytable import PrettyTable
 from pprint import pprint
+import arrow
 from cifsdk.format import COLUMNS, MAX_FIELD_SIZE
 
 
@@ -14,6 +15,7 @@ class Table(object):
         t = PrettyTable(self.cols)
         t.align['provider'] = 'l'
         for obs in reversed(self.data):
+            pprint(obs)
             r = []
             for c in self.cols:
                 y = obs.get(c, '')
@@ -29,7 +31,11 @@ class Table(object):
                     # python3
                     pass
 
-                y = str(y)
+                if c in ['firsttime', 'lasttime', 'reporttime']:
+                    y = arrow.get(y).format('YYYY-MM-DDTHH:mm:ss.SSSSS')
+                    y = '{}Z'.format(y)
+                else:
+                    y = str(y)
                 y = (y[:self.max_field_size] + '..') if len(y) > self.max_field_size else y
                 r.append(y)
             t.add_row(r)
