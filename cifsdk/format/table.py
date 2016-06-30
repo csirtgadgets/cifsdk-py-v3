@@ -11,7 +11,6 @@ class Table(Plugin):
         t = PrettyTable(self.cols)
         t.align['provider'] = 'l'
         for obs in reversed(self.data):
-            pprint(obs)
             r = []
             for c in self.cols:
                 y = obs.get(c, '')

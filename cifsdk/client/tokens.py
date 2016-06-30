@@ -8,6 +8,7 @@ from argparse import RawDescriptionHelpFormatter
 
 from cifsdk.constants import REMOTE_ADDR, CONFIG_PATH
 from cifsdk.utils import setup_logging, get_argument_parser, read_config
+from cifsdk.utils.zarrow import parse_timestamp
 from cifsdk.exceptions import AuthError
 from prettytable import PrettyTable
 import arrow
@@ -52,7 +53,7 @@ def main():
     p.add_argument('--columns', help='specify columns to print when searching [default %(default)s]',
                    default=','.join(COLS))
 
-    p.add_argument('--config-generate', help='generate configuration file [default %(default)s]', default=CONFIG_PATH)
+    p.add_argument('--config-generate', help='generate configuration file')
     p.add_argument('--config', help='specify configuration file [default %(default)s]', default=CONFIG_PATH)
     p.add_argument('--no-verify-ssl', help='Turn OFF TLS verification', action='store_true')
 
@@ -87,7 +88,8 @@ def main():
             raise RuntimeError('missing --username')
 
         if not (options.get('read') or options.get('write')):
-            raise RuntimeError('missing --read or --write')
+            logger.info('assuming --read token')
+            options['read'] = True
 
         groups = set(options.get('groups').split(','))
         if not options.get('no_everyone'):
@@ -123,13 +125,21 @@ def main():
             t = PrettyTable(args.columns.split(','))
             l = []
             for c in args.columns.split(','):
-                if c == 'last_activity_at' and rv[c] is not None:
+                if c == 'last_activity_at' and rv.get(c):
                     rv[c] = arrow.get(rv[c]).format('YYYY-MM-DDTHH:MM:ss')
                     rv[c] = '{}Z'.format(rv[c])
-                if c == 'expires' and rv[c] is not None:
+
+                if c == 'expires' and rv[c] and rv.get(c):
                     rv[c] = arrow.get(rv[c]).format('YYYY-MM-DDTHH:MM:ss')
                     rv[c] = '{}Z'.format(rv[c])
-                l.append(rv[c])
+
+                if rv.get(c):
+                    if type(rv[c]) == list:
+                        l.append(','.join(rv[c]))
+                    else:
+                        l.append(str(rv[c]))
+                else:
+                    l.append(None)
             t.add_row(l)
             print(t)
 
@@ -192,10 +202,10 @@ def main():
                 l = []
                 for c in args.columns.split(','):
                     if c == 'last_activity_at' and r.get(c) is not None:
-                        r[c] = arrow.get(r[c]).format('YYYY-MM-DDTHH:MM:ss')
+                        r[c] = parse_timestamp(r[c]).format('YYYY-MM-DDTHH:mm:ss.SS')
                         r[c] = '{}Z'.format(r[c])
                     if c == 'expires' and r.get(c) is not None:
-                        r[c] = arrow.get(r[c]).format('YYYY-MM-DDTHH:MM:ss')
+                        r[c] = parse_timestamp(r[c]).format('YYYY-MM-DDTHH:mm:ss.SS')
                         r[c] = '{}Z'.format(r[c])
                     if type(r.get(c)) == list:
                         r[c] = ','.join(r[c])

@@ -56,6 +56,7 @@ def main():
 
     p.add_argument('--indicator')
     p.add_argument('--tags', nargs='+')
+    p.add_argument('--provider')
 
     p.add_argument("--zmq", help="use zmq as a transport instead of http", action="store_true")
 
@@ -104,6 +105,7 @@ def main():
             rv = cli.search({
                 'itype': options['itype'],
                 'limit': options['limit'],
+                'provider': options.get('provider')
             })
         except AuthError as e:
             logger.error('unauthorized')
