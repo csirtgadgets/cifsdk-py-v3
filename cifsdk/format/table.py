@@ -1,6 +1,7 @@
 from prettytable import PrettyTable
 from pprint import pprint
 from cifsdk.format.plugin import Plugin
+from cifsdk.utils.zarrow import parse_timestamp
 import arrow
 
 
@@ -26,7 +27,7 @@ class Table(Plugin):
                     # python3
                     pass
 
-                if c in ['firsttime', 'lasttime', 'reporttime']:
+                if y and (c in ['firsttime', 'lasttime', 'reporttime']):
                     y = arrow.get(y).format('YYYY-MM-DDTHH:mm:ss.SSSSS')
                     y = '{}Z'.format(y)
                 else:
