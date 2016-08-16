@@ -15,9 +15,15 @@ class Dummy(Client):
         if isinstance(data, dict):
             data = self._kv_to_indicator(data)
 
+        if type(data) == dict:
+            data = [data]
+
         return data
 
     def indicators_search(self, data):
+        if type(data) == dict:
+            data = [data]
+
         return data
 
 Plugin = Dummy
