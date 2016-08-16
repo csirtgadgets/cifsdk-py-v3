@@ -12,6 +12,7 @@ from cifsdk.exceptions import AuthError
 from cifsdk.format import FORMATS
 from cifsdk.utils import setup_logging, get_argument_parser, read_config
 from csirtg_indicator import Indicator
+from pprint import pprint
 
 
 class Client(object):
@@ -70,6 +71,8 @@ def main():
     o = read_config(args)
     options = vars(args)
     for v in options:
+        if v == 'remote' and options[v] == REMOTE_ADDR and o.get('remote'):
+            options[v] = o['remote']
         if options[v] is None:
             options[v] = o.get(v)
 
@@ -79,8 +82,6 @@ def main():
     verify_ssl = True
     if o.get('no_verify_ssl') or options.get('no_verify_ssl'):
         verify_ssl = False
-
-    options = vars(args)
 
     if options.get("zmq"):
         from cifsdk.client.zeromq import ZMQ as ZMQClient
