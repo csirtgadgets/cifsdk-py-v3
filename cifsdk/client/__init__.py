@@ -135,8 +135,10 @@ def main():
             print(FORMATS[options.get('format')](data=rv))
     elif options.get("submit"):
         logger.info("submitting {0}".format(options.get("submit")))
+        i = Indicator(indicator=args.indicator, tags=args.tags)
+        rv = cli.indicators_create(i)
 
-        rv = cli.submit(indicator=args.indicator, tags=args.tags)
+        logger.info('success id: {}'.format(rv))
 
 if __name__ == "__main__":
     main()
