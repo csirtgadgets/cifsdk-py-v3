@@ -3,7 +3,10 @@ import requests
 import time
 import json
 from cifsdk.exceptions import AuthError, TimeoutError
+from cifsdk.constants import VERSION
 from pprint import pprint
+import zlib
+from base64 import b64decode
 
 from cifsdk.client.plugin import Client
 
@@ -19,9 +22,10 @@ class HTTP(Client):
 
         self.session = requests.Session()
         self.session.headers["Accept"] = 'application/vnd.cif.v3+json'
-        self.session.headers['User-Agent'] = 'cif-sdk-py/3.0.0a1'
+        self.session.headers['User-Agent'] = 'cifsdk-py/{}'.format(VERSION)
         self.session.headers['Authorization'] = 'Token token=' + self.token
         self.session.headers['Content-Type'] = 'application/json'
+        self.session.headers['Accept-Encoding'] = 'gzip'
 
     def _get(self, uri, params={}):
         if not uri.startswith('http'):
@@ -48,12 +52,15 @@ class HTTP(Client):
                     self.logger.error(err)
                     raise RuntimeError(err)
 
-        return json.loads(body.content)
+        data = body.content
+        data = zlib.decompress(b64decode(data))
+        return json.loads(data)
 
     def _post(self, uri, data):
         if type(data) == dict:
             data = json.dumps(data)
 
+        # TODO -- compression?
         body = self.session.post(uri, data=data)
 
         if body.status_code > 303:
@@ -144,6 +151,10 @@ class HTTP(Client):
         self.logger.debug(uri)
         rv = self._post(uri, data)
         return rv["data"]
+
+    def feed(self, filters):
+        rv = self._get('/feed', params=filters)
+        return rv['data']
 
     def ping(self, write=False):
         t0 = time.time()

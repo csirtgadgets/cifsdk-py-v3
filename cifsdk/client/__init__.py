@@ -26,10 +26,13 @@ class Client(object):
         return Indicator(**kv)
 
     def ping(self):
-        raise NotImplementedError
+        raise NotImplemented
 
     def search(self):
-        raise NotImplementedError
+        raise NotImplemented
+
+    def feed(self):
+        raise NotImplemented
 
 
 def main():
@@ -58,10 +61,13 @@ def main():
     p.add_argument('--indicator')
     p.add_argument('--tags', nargs='+')
     p.add_argument('--provider')
+    p.add_argument('--confidence', help="specify confidence level")
 
     p.add_argument("--zmq", help="use zmq as a transport instead of http", action="store_true")
 
     p.add_argument('--config', help='specify config file [default %(default)s]', default=CONFIG_PATH)
+
+    p.add_argument('--feed', action='store_true')
 
     args = p.parse_args()
 
@@ -100,6 +106,22 @@ def main():
             else:
                 logger.error('ping failed')
                 raise RuntimeError
+    elif options.get('feed'):
+        logger.info('searching for {}'.format(options['itype']))
+        try:
+            rv = cli.feed({
+                'itype': options['itype'],
+                'limit': options['limit'],
+            })
+        except AuthError as e:
+            logger.error('unauthorized')
+        except RuntimeError as e:
+            import traceback
+            traceback.print_exc()
+            logger.error(e)
+        else:
+            print(FORMATS[options.get('format')](data=rv))
+
     elif options.get('itype'):
         logger.info('searching for {}'.format(options['itype']))
         try:
@@ -135,7 +157,7 @@ def main():
             print(FORMATS[options.get('format')](data=rv))
     elif options.get("submit"):
         logger.info("submitting {0}".format(options.get("submit")))
-        i = Indicator(indicator=args.indicator, tags=args.tags)
+        i = Indicator(indicator=args.indicator, tags=args.tags, confidence=args.confidence)
         rv = cli.indicators_create(i)
 
         logger.info('success id: {}'.format(rv))
