@@ -1,4 +1,5 @@
 import csv
+from cifsdk.constants import PYVERSION
 
 try:
     from StringIO import StringIO
@@ -22,9 +23,12 @@ class Csv(Plugin):
                 y = obs.get(c, u'')
                 if type(y) is list:
                     y = u','.join(y)
-                
-                y = unicode(y).replace('\n', r'\\n')
-                r[c] = y.encode('utf-8', 'ignore')
+
+                if PYVERSION < 3:
+                    y = unicode(y).replace('\n', r'\\n')
+                    r[c] = y.encode('utf-8', 'ignore')
+                else:
+                    r[c] = y.replace('\n', r'\\n')
                 
             csvWriter.writerow(r)
         

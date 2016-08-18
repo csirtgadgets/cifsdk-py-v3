@@ -1,5 +1,6 @@
 import os.path
 import tempfile
+import sys
 
 from ._version import get_versions
 VERSION = get_versions()['version']
@@ -31,3 +32,8 @@ SEARCH_LIMIT = os.environ.get('CIF_SEARCH_LIMIT', 500)
 
 TOKEN = os.environ.get('CIF_TOKEN', None)
 FORMAT = os.environ.get('CIF_FORMAT', 'table')
+
+
+PYVERSION = 2
+if sys.version_info > (3,):
+    PYVERSION = 3

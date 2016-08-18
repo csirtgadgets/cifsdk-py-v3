@@ -1,8 +1,7 @@
-https://github.com/csirtgadgets/csirtg-indicator-py/archive/0.0.0a0.tar.gz#egg=csirtg_indicator
-ipaddr>=2.1.11
+https://github.com/csirtgadgets/csirtg-indicator-py/archive/0.0.0a4.tar.gz
 PyYAML>=3.11
 prettytable>=0.7.2
 pyaml>=15.03.1
-pyzmq==14.7.0
+pyzmq==15.4.0
 requests>=2.6.0
 urllib3>=1.10.2
