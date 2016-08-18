@@ -53,7 +53,11 @@ class HTTP(Client):
                     raise RuntimeError(err)
 
         data = body.content
-        data = zlib.decompress(b64decode(data))
+        try:
+            data = zlib.decompress(b64decode(data))
+        except TypeError as e:
+            pass
+
         return json.loads(data)
 
     def _post(self, uri, data):
