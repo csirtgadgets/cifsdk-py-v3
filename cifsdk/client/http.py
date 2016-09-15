@@ -7,6 +7,7 @@ from cifsdk.constants import VERSION
 from pprint import pprint
 import zlib
 from base64 import b64decode
+import binascii
 
 from cifsdk.client.plugin import Client
 
@@ -55,10 +56,21 @@ class HTTP(Client):
         data = body.content
         try:
             data = zlib.decompress(b64decode(data))
-        except TypeError as e:
+        except (TypeError, binascii.Error) as e:
+            pass
+        except Exception as e:
             pass
 
-        return json.loads(data)
+        msgs = json.loads(data.decode('utf-8'))
+
+        if isinstance(msgs['data'], list):
+            for m in msgs['data']:
+                if m.get('message'):
+                    try:
+                        m['message'] = b64decode(m['message'])
+                    except Exception as e:
+                        pass
+        return msgs
 
     def _post(self, uri, data):
         if type(data) == dict:
@@ -81,15 +93,15 @@ class HTTP(Client):
                 raise TimeoutError('timeout')
             else:
                 try:
-                    err = json.loads(err).get('message')
+                    err = json.loads(err.decode('utf-8')).get('message')
                 except ValueError as e:
                     err = body.content
 
                 self.logger.error(err)
                 raise RuntimeError(err)
 
-        self.logger.debug(body.content)
-        body = json.loads(body.content)
+        self.logger.debug(body.content.decode('utf-8'))
+        body = json.loads(body.content.decode('utf-8'))
         return body
 
     def _delete(self, uri, data):
@@ -149,7 +161,7 @@ class HTTP(Client):
         return rv['data']
 
     def indicators_create(self, data):
-        data = str(data)
+        data = str(data).encode('utf-8')
 
         uri = "{0}/indicators".format(self.remote)
         self.logger.debug(uri)

@@ -2,6 +2,7 @@ import time
 import json
 from cifsdk.client import Client
 from cifsdk.exceptions import AuthError, CIFConnectionError, TimeoutError, InvalidSearch
+from cifsdk.constants import PYVERSION
 
 from pprint import pprint
 
@@ -30,7 +31,7 @@ class ZMQ(Client):
 
     def _recv(self):
         mtype, data = self.socket.recv_multipart()
-        data = json.loads(data)
+        data = json.loads(data.decode('utf-8'))
 
         if data.get('status') == 'success':
             return data.get('data')
@@ -52,12 +53,15 @@ class ZMQ(Client):
         # zmq requires .encode
         self.logger.debug("sending")
 
+        if type(data) == str:
+            data = data.encode('utf-8')
+
         sent = False
         while not sent and retries > 0:
             try:
                 self.socket.send_multipart([self.token.encode(ENCODING_DEFAULT),
                                             mtype.encode(ENCODING_DEFAULT),
-                                            data.encode(ENCODING_DEFAULT)])
+                                            data])
                 sent = True
             except zmq.error.Again:
                 self.logger.warning('timeout... retrying in 5s')
