@@ -92,7 +92,7 @@ class ZMQ(Client):
 
         null, mtype, data = m
 
-        data = json.loads(data)
+        data = json.loads(data.decode('utf-8'))
 
         self.response.append(data)
 
@@ -136,7 +136,7 @@ class ZMQ(Client):
         # zmq requires .encode
         for d in data:
             d = json.dumps(d)
-            self.socket.send_multipart(['', self.token.encode(ENCODING_DEFAULT),
+            self.socket.send_multipart([b'', self.token.encode(ENCODING_DEFAULT),
                                         mtype.encode(ENCODING_DEFAULT),
                                         d.encode(ENCODING_DEFAULT)])
 
