@@ -8,14 +8,15 @@ from pprint import pprint
 import zlib
 from base64 import b64decode
 import binascii
-
 from cifsdk.client.plugin import Client
+
+logger = logging.getLogger(__name__)
 
 
 class HTTP(Client):
 
     def __init__(self, remote, token, proxy=None, timeout=300, verify_ssl=True, **kwargs):
-        super(HTTP, self).__init__(remote, token, *kwargs)
+        super(HTTP, self).__init__(remote, token, **kwargs)
 
         self.proxy = proxy
         self.timeout = timeout
@@ -35,7 +36,7 @@ class HTTP(Client):
 
         if body.status_code > 303:
             err = 'request failed: %s' % str(body.status_code)
-            self.logger.debug(err)
+            logger.error(err)
 
             if body.status_code == 401:
                 raise AuthError('invalid token')
@@ -50,7 +51,7 @@ class HTTP(Client):
                     raise RuntimeError(err)
                 except ValueError as e:
                     err = body.content
-                    self.logger.error(err)
+                    logger.error(err)
                     raise RuntimeError(err)
 
         data = body.content
@@ -81,7 +82,7 @@ class HTTP(Client):
 
         if body.status_code > 303:
             err = 'request failed: %s' % str(body.status_code)
-            self.logger.debug(err)
+            logger.debug(err)
             err = body.content
 
             if body.status_code == 401:
@@ -97,10 +98,10 @@ class HTTP(Client):
                 except ValueError as e:
                     err = body.content
 
-                self.logger.error(err)
+                logger.error(err)
                 raise RuntimeError(err)
 
-        self.logger.debug(body.content.decode('utf-8'))
+        logger.debug(body.content.decode('utf-8'))
         body = json.loads(body.content.decode('utf-8'))
         return body
 
@@ -109,7 +110,7 @@ class HTTP(Client):
 
         if body.status_code > 303:
             err = 'request failed: %s' % str(body.status_code)
-            self.logger.debug(err)
+            logger.debug(err)
             err = body.content
 
             if body.status_code == 401:
@@ -123,10 +124,10 @@ class HTTP(Client):
                 except ValueError as e:
                     err = body.content
 
-                self.logger.error(err)
+                logger.error(err)
                 raise RuntimeError(err)
 
-        self.logger.debug(body.content)
+        logger.debug(body.content)
         body = json.loads(body.content)
         return body
 
@@ -135,7 +136,7 @@ class HTTP(Client):
 
         if body.status_code > 303:
             err = 'request failed: %s' % str(body.status_code)
-            self.logger.debug(err)
+            logger.debug(err)
             err = body.content
 
             if body.status_code == 401:
@@ -149,10 +150,10 @@ class HTTP(Client):
                 except ValueError as e:
                     err = body.content
 
-                self.logger.error(err)
+                logger.error(err)
                 raise RuntimeError(err)
 
-        self.logger.debug(body.content)
+        logger.debug(body.content)
         body = json.loads(body.content)
         return body
 
@@ -164,7 +165,7 @@ class HTTP(Client):
         data = str(data).encode('utf-8')
 
         uri = "{0}/indicators".format(self.remote)
-        self.logger.debug(uri)
+        logger.debug(uri)
         rv = self._post(uri, data)
         return rv["data"]
 
@@ -183,7 +184,7 @@ class HTTP(Client):
 
         if rv:
             rv = (time.time() - t0)
-            self.logger.debug('return time: %.15f' % rv)
+            logger.debug('return time: %.15f' % rv)
 
         return rv
 
@@ -196,7 +197,7 @@ class HTTP(Client):
         return rv['data']
 
     def tokens_create(self, data):
-        self.logger.debug(data)
+        logger.debug(data)
         rv = self._post('{}/tokens'.format(self.remote), data)
         return rv['data']
 
