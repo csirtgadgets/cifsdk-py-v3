@@ -37,3 +37,9 @@ FORMAT = os.environ.get('CIF_FORMAT', 'table')
 PYVERSION = 2
 if sys.version_info > (3,):
     PYVERSION = 3
+
+COLUMNS = ['tlp', 'lasttime', 'reporttime', 'count', 'itype', 'indicator', 'cc', 'asn', 'asn_desc', 'confidence',
+           'description', 'tags', 'rdata', 'provider']
+
+#COLUMNS = ['firsttime', 'lasttime', 'reporttime', 'count', 'itype', 'indicator', 'msg']
+MAX_FIELD_SIZE = 30

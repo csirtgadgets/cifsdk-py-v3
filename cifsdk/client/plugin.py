@@ -5,8 +5,7 @@ from csirtg_indicator import Indicator
 
 class Client(object):
 
-    def __init__(self, remote, token):
-        self.logger = logging.getLogger(__name__)
+    def __init__(self, remote, token, **kwargs):
         self.remote = remote
         self.token = str(token)
 

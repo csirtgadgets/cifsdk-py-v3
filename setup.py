@@ -32,6 +32,7 @@ setup(
         'pyzmq==15.4.0',
         'requests>=2.6.0',
         'urllib3>=1.10.2',
+        'csirtg_indicator',
     ],
     scripts=[],
     entry_points={

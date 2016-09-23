@@ -2,22 +2,27 @@ import time
 import json
 from cifsdk.client import Client
 from cifsdk.exceptions import AuthError, CIFConnectionError, TimeoutError, InvalidSearch
+from cifsdk.constants import PYVERSION
+import logging
 
 from pprint import pprint
 
 import zmq
 
-SNDTIMEO = 30000
-RCVTIMEO = 30000
+SNDTIMEO = 90000
+RCVTIMEO = 90000
 LINGER = 3
 ENCODING_DEFAULT = "utf-8"
 SEARCH_LIMIT = 100
 RETRIES = 5
 RETRY_SLEEP = 5
+FIREBALL_SIZE = 500
+
+logger = logging.getLogger(__name__)
 
 
 class ZMQ(Client):
-    def __init__(self, remote, token):
+    def __init__(self, remote, token, **kwargs):
         super(ZMQ, self).__init__(remote, token)
 
         self.context = zmq.Context.instance()
@@ -25,12 +30,16 @@ class ZMQ(Client):
         self.socket.RCVTIMEO = RCVTIMEO
         self.socket.SNDTIMEO = SNDTIMEO
         self.socket.setsockopt(zmq.LINGER, LINGER)
+        self.nowait = kwargs.get('nowait', False)
+        if self.nowait:
+            self.socket = self.context.socket(zmq.DEALER)
 
-        self.logger.debug('token: {}'.format(token))
+        logger.debug('token: {}'.format(self.token))
+        logger.debug('remote: {}'.format(self.remote))
 
     def _recv(self):
         mtype, data = self.socket.recv_multipart()
-        data = json.loads(data)
+        data = json.loads(data.decode('utf-8'))
 
         if data.get('status') == 'success':
             return data.get('data')
@@ -39,77 +48,81 @@ class ZMQ(Client):
         elif data.get('message') == 'invalid search':
             raise InvalidSearch('invalid search')
         else:
-            self.logger.error(data.get('status'))
-            self.logger.error(data.get('data'))
+            logger.error(data.get('status'))
+            logger.error(data.get('data'))
             raise RuntimeError(data.get('message'))
 
-    def _send(self, mtype, data='[]', retries=RETRIES, timeout=SNDTIMEO, retry_sleep=RETRY_SLEEP):
-        self.logger.debug('connecting to {0}'.format(self.remote))
-        self.logger.debug("mtype {0}".format(mtype))
-
+    def _send(self, mtype, data='[]', retries=RETRIES, timeout=SNDTIMEO, retry_sleep=RETRY_SLEEP, nowait=False):
+        logger.debug('connecting to: %s' % self.remote)
         self.socket.connect(self.remote)
 
-        # zmq requires .encode
-        self.logger.debug("sending")
+        if type(data) == str:
+            data = data.encode('utf-8')
 
         sent = False
         while not sent and retries > 0:
             try:
                 self.socket.send_multipart([self.token.encode(ENCODING_DEFAULT),
                                             mtype.encode(ENCODING_DEFAULT),
-                                            data.encode(ENCODING_DEFAULT)])
+                                            data])
                 sent = True
             except zmq.error.Again:
-                self.logger.warning('timeout... retrying in 5s')
+                logger.warning('timeout... retrying in 5s')
                 retries -= 1
                 time.sleep(retry_sleep)
 
         if not sent:
             m = 'unable to connect to remote: {}'.format(self.remote)
-            self.logger.warn(m)
+            logger.warn(m)
             raise TimeoutError(m)
 
-        self.logger.debug("receiving")
-        retries = RETRIES
-        while retries > 0:
-            try:
-                return self._recv()
-            except zmq.error.Again:
-                self.logger.warn('timeout trying to receive, retrying...')
-                retries -= 1
+        if self.nowait or nowait:
+            logger.debug('not waiting for a resp')
+        else:
+            logger.debug("receiving")
+            retries = RETRIES
+            while retries > 0:
+                try:
+                    return self._recv()
+                except zmq.error.Again:
+                    logger.warn('timeout trying to receive, retrying...')
+                    retries -= 1
 
-        raise TimeoutError('timeout waiting for: {}'.format(self.remote))
+            self.socket.close()
+            raise TimeoutError('timeout waiting for: {}'.format(self.remote))
 
     def _handle_message_fireball(self, s, e):
-        self.logger.debug('message recieved')
+        logger.debug('message recieved')
         m = s.recv_multipart()
 
-        self.logger.debug(m)
+        logger.debug(m)
 
         null, mtype, data = m
 
-        data = json.loads(data)
+        data = json.loads(data.decode('utf-8'))
 
         self.response.append(data)
 
         self.num_responses -= 1
-        self.logger.debug('num responses remaining: %i' % self.num_responses)
+        logger.debug('num responses remaining: %i' % self.num_responses)
         if self.num_responses == 0:
-            self.logger.debug('finishing up...')
+            logger.debug('finishing up...')
             self.loop.stop()
 
+        logger.debug('loop stopped')
+
     def _send_fireball_timeout(self):
-        self.logger.warn('timeout')
+        logger.warn('timeout')
         self.loop.stop()
         raise TimeoutError('timeout')
 
     def _send_fireball(self, mtype, data):
         if len(data) < 3:
-            self.logger.error('no data to send')
+            logger.error('no data to send')
             return []
 
-        self.logger.debug('connecting to {0}'.format(self.remote))
-        self.logger.debug("mtype {0}".format(mtype))
+        logger.debug('connecting to {0}'.format(self.remote))
+        logger.debug("mtype {0}".format(mtype))
         self.socket = self.context.socket(zmq.DEALER)
         self.socket.connect(self.remote)
 
@@ -126,19 +139,31 @@ class ZMQ(Client):
         if not isinstance(data, list):
             data = [data]
 
-        self.num_responses = len(data)
-        self.logger.debug('responses: %i' % self.num_responses)
+        if (len(data) / FIREBALL_SIZE) % FIREBALL_SIZE == 0:
+            self.num_responses = (len(data) / FIREBALL_SIZE)
+        else:
+            self.num_responses = int((len(data) / FIREBALL_SIZE)) + 1
 
-        # zmq requires .encode
+        logger.debug('responses: %i' % self.num_responses)
+
+        batch = []
         for d in data:
-            d = json.dumps(d)
-            self.socket.send_multipart(['', self.token.encode(ENCODING_DEFAULT),
+            batch.append(d)
+            if len(batch) == 1000:
+                dd = json.dumps(batch)
+                self.socket.send_multipart([b'', self.token.encode(ENCODING_DEFAULT),
+                                            mtype.encode(ENCODING_DEFAULT),
+                                            dd.encode(ENCODING_DEFAULT)])
+                batch = []
+
+        if len(batch):
+            dd = json.dumps(batch)
+            self.socket.send_multipart([b'', self.token.encode(ENCODING_DEFAULT),
                                         mtype.encode(ENCODING_DEFAULT),
-                                        d.encode(ENCODING_DEFAULT)])
-
-        self.logger.debug("starting loop to receive")
+                                        dd.encode(ENCODING_DEFAULT)])
+        logger.debug("starting loop to receive")
         self.loop.start()
-
+        self.socket.close()
         return self.response
 
     def test_connect(self):
@@ -161,18 +186,18 @@ class ZMQ(Client):
         rv = self._send('indicators_search', json.dumps(filters))
         return rv
 
-    def indicators_create(self, data, fireball=False):
+    def indicators_create(self, data, nowait=False):
         if isinstance(data, dict):
             data = self._kv_to_indicator(data)
 
         if not isinstance(data, str):
             data = str(data)
 
-        if fireball:
-            self.logger.info('using fireball mode')
+        if self.fireball:
+            logger.info('using fireball mode')
             data = self._send_fireball("indicators_create", data)
         else:
-            data = self._send('indicators_create', data)
+            data = self._send('indicators_create', data, nowait=nowait)
 
         return data
 

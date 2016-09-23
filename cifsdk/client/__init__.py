@@ -9,18 +9,23 @@ from argparse import RawDescriptionHelpFormatter
 
 from cifsdk.constants import CONFIG_PATH, REMOTE_ADDR, TOKEN, SEARCH_LIMIT, FORMAT
 from cifsdk.exceptions import AuthError
-from cifsdk.format import FORMATS
+from csirtg_indicator.format import FORMATS
 from cifsdk.utils import setup_logging, get_argument_parser, read_config
 from csirtg_indicator import Indicator
 from pprint import pprint
 
+logger = logging.getLogger(__name__)
+
 
 class Client(object):
 
-    def __init__(self, remote, token):
-        self.logger = logging.getLogger(__name__)
+    def __init__(self, remote, token, **kwargs):
         self.remote = remote
         self.token = str(token)
+
+        self.fireball = False
+        if kwargs.get('fireball'):
+            self.fireball = kwargs['fireball']
 
     def _kv_to_indicator(self, kv):
         return Indicator(**kv)
@@ -128,7 +133,8 @@ def main():
             rv = cli.search({
                 'itype': options['itype'],
                 'limit': options['limit'],
-                'provider': options.get('provider')
+                'provider': options.get('provider'),
+                'indicator': options.get('search')
             })
         except AuthError as e:
             logger.error('unauthorized')
