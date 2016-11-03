@@ -48,6 +48,8 @@ PYINSTALLER_DIST_PATH = dist
 PYINSTALLER_WORK_PATH = temp
 VERSION = `git describe`
 
+pyinstaller: bin
+
 bin:
 	mkdir -p $(PYINSTALLER_BUILD) ;
 	cp -a cifsdk $(PYINSTALLER_BUILD) ;
