@@ -1,3 +1,7 @@
+.vagrant
+_version
+.DS_Store
+pyinstaller-build
 coverage_html_report
 .idea
 # Byte-compiled / optimized / DLL files
@@ -30,7 +34,9 @@ var/
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
-*.spec
+#*.spec
+
+
 
 # Installer logs
 pip-log.txt
