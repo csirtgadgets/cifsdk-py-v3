@@ -1,4 +1,4 @@
-Source: bearded-avenger-sdk
+Source: cifsdk
 Section: admin
 Priority: optional
 Standards-Version: 3.9.3
@@ -6,8 +6,8 @@ Maintainer: Wes Young <wes@csirtgadgets.org>
 Build-Depends: cdbs, debhelper (>= 5.0.0)
 Homepage: https://github.com/csirtgadgets/bearded-avenger-sdk-py
 
-Package: bearded-avenger-sdk
+Package: cifsdk
 Architecture: all
 Depends: ${misc:Depends}
-Description: The smartest way to consume threat intelligence
- The smartest way to consume threat intelligence
+Description: The fastest way to consume threat intelligence
+ The fastest way to consume threat intelligence

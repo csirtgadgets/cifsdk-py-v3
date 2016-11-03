@@ -1,3 +1,4 @@
+.vagrant
 _version
 .DS_Store
 pyinstaller-build

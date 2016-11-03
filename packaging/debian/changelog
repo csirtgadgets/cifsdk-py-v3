@@ -1,4 +1,4 @@
-bearded-avenger (%VERSION%-%RELEASE%~%DIST%) %DIST%; urgency=low
+cifsdk (%VERSION%-%RELEASE%~%DIST%) %DIST%; urgency=low
 
   * %VERSION% release
 

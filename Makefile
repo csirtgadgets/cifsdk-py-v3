@@ -99,7 +99,7 @@ deb: debian
 	    (cd deb-build/$${DIST}/$(NAME)-$(VERSION)/ && $(DEBUILD) -b) ; \
 	done
 	@echo "#############################################"
-	@echo "bearded-avenger-sdk DEB artifacts:"
+	@echo "cifsdk DEB artifacts:"
 	@for DIST in $(DEB_DIST) ; do \
 	    echo deb-build/$${DIST}/$(NAME)_$(VERSION)-$(DEB_RELEASE)~$${DIST}_amd64.changes ; \
 	done
@@ -135,7 +135,7 @@ rpm: rpmcommon
 	-ba rpm-build/$(NAME).spec
 	@rm -f rpm-build/$(NAME).spec
 	@echo "#############################################"
-	@echo "bearded-avenger RPM is built:"
+	@echo "cifsdk RPM is built:"
 	@echo "    rpm-build/$(RPMNVR).noarch.rpm"
 	@echo "#############################################"
 
