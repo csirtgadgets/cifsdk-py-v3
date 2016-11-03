@@ -1,3 +1,6 @@
+_version
+.DS_Store
+pyinstaller-build
 coverage_html_report
 .idea
 # Byte-compiled / optimized / DLL files

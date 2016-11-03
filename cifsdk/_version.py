@@ -409,7 +409,7 @@ def render_git_describe_long(pieces):
     return rendered
 
 
-def render(pieces, style):
+def render(pieces, style=None):
     """Render the given version pieces into the requested style."""
     if pieces["error"]:
         return {"version": "unknown",
@@ -478,6 +478,17 @@ def get_versions():
             return versions_from_parentdir(cfg.parentdir_prefix, root, verbose)
     except NotThisMethod:
         pass
+
+    _version_path = os.path.join(os.path.dirname(__file__), '_version')
+    if os.path.exists(_version_path):
+        with open(_version_path) as f:
+            l = f.readline().strip()
+            return {
+                'version': l,
+                'error': None,
+                'dirty': None,
+                'full-revisionid': l
+            }
 
     return {"version": "0+unknown", "full-revisionid": None,
             "dirty": None,
