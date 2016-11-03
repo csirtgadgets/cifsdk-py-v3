@@ -5,12 +5,18 @@ python:
     - 2.7
     - 3.4
     - 3.5
- 
-before_install:
-    - sudo pip install pytest-cov
+
+
+install:
+  - pip install -r dev_requirements.txt
 
 script:
-    - py.test --cov=cifsdk --cov-fail-under=65
+  - python setup.py test
+  - python setup.py sdist bdist bdist_wheel
+  - make bin
+  - "cp ./pyinstaller-build/dist/cif ~/ && cd ~/ && ./cif -v"
+  - sudo apt-get install build-essential virtualenvwrapper python-virtualenv devscripts debhelper cdbs
+  - make deb
 
 notifications:
     email:
