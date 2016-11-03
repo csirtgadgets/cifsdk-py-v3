@@ -99,7 +99,7 @@ deb: debian
 	    (cd deb-build/$${DIST}/$(NAME)-$(VERSION)/ && $(DEBUILD) -b) ; \
 	done
 	@echo "#############################################"
-	@echo "bearded-avenger DEB artifacts:"
+	@echo "bearded-avenger-sdk DEB artifacts:"
 	@for DIST in $(DEB_DIST) ; do \
 	    echo deb-build/$${DIST}/$(NAME)_$(VERSION)-$(DEB_RELEASE)~$${DIST}_amd64.changes ; \
 	done

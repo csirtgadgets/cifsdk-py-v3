@@ -4,9 +4,9 @@ Priority: optional
 Standards-Version: 3.9.3
 Maintainer: Wes Young <wes@csirtgadgets.org>
 Build-Depends: cdbs, debhelper (>= 5.0.0)
-Homepage: https://github.com/csirtgadgets/bearded-avenger
+Homepage: https://github.com/csirtgadgets/bearded-avenger-sdk
 
-Package: bearded-avenger
+Package: bearded-avenger-sdk
 Architecture: all
 Depends: ${misc:Depends}
 Description: The smartest way to consume threat intelligence
