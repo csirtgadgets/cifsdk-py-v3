@@ -49,7 +49,7 @@ setup(
         'PyYAML>=3.11',
         'prettytable>=0.7.2',
         'pyaml>=15.03.1',
-        'pyzmq==15.4.0',
+        'pyzmq>=16.0',
         'requests>=2.6.0',
         'urllib3>=1.10.2',
         'csirtg_indicator',
