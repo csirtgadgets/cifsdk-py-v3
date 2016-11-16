@@ -11,7 +11,7 @@ import binascii
 from cifsdk.client.plugin import Client
 
 logger = logging.getLogger(__name__)
-
+requests.packages.urllib3.disable_warnings()
 
 class HTTP(Client):
 
