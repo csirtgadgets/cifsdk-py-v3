@@ -101,6 +101,9 @@ def main():
         cli = ZMQClient(**options)
     else:
         from cifsdk.client.http import HTTP as HTTPClient
+        if args.remote == 'https://localhost':
+            verify_ssl = False
+
         cli = HTTPClient(args.remote, args.token, verify_ssl=verify_ssl)
 
     if options.get('ping'):
