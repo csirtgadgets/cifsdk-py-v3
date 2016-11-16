@@ -74,6 +74,8 @@ def main():
 
     p.add_argument('--feed', action='store_true')
 
+    p.add_argument('--no-verify-ssl', action='store_true')
+
     args = p.parse_args()
 
     setup_logging(args)
