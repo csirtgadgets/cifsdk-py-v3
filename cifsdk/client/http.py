@@ -78,7 +78,7 @@ class HTTP(Client):
             data = json.dumps(data)
 
         # TODO -- compression?
-        body = self.session.post(uri, data=data)
+        body = self.session.post(uri, data=data, verify=self.verify_ssl)
 
         if body.status_code > 303:
             err = 'request failed: %s' % str(body.status_code)
