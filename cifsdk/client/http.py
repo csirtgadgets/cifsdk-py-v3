@@ -21,6 +21,7 @@ class HTTP(Client):
         self.proxy = proxy
         self.timeout = timeout
         self.verify_ssl = verify_ssl
+        self.nowait = kwargs.get('nowait', False)
 
         self.session = requests.Session()
         self.session.headers["Accept"] = 'application/vnd.cif.v3+json'
@@ -77,7 +78,9 @@ class HTTP(Client):
         if type(data) == dict:
             data = json.dumps(data)
 
-        # TODO -- compression?
+        if self.nowait:
+            uri = '{}?nowait=1'.format(uri)
+
         body = self.session.post(uri, data=data, verify=self.verify_ssl)
 
         if body.status_code > 303:

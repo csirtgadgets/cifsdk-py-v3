@@ -4,17 +4,18 @@ from cifsdk.client import Client
 from cifsdk.exceptions import AuthError, CIFConnectionError, TimeoutError, InvalidSearch
 from cifsdk.constants import PYVERSION
 import logging
+import os
 
 from pprint import pprint
 
 import zmq
 
-SNDTIMEO = 90000
-RCVTIMEO = 90000
+SNDTIMEO = os.environ.get('ZMQ_SNDTIMEO', 90000)  # 90s
+RCVTIMEO = os.environ.get('ZMQ_RCVTIMEO', 90000)  # 90s
 LINGER = 3
 ENCODING_DEFAULT = "utf-8"
 SEARCH_LIMIT = 100
-RETRIES = 5
+RETRIES = os.environ.get('ZMQ_RETRIES', 5)
 RETRY_SLEEP = 5
 FIREBALL_SIZE = 500
 
