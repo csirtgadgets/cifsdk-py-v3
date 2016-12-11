@@ -1,0 +1,112 @@
+import ujson as json
+from pprint import pprint
+import msgpack
+import logging
+
+logger = logging.getLogger(__name__)
+
+MAP = {
+    1: 'ping',
+    2: 'ping_write',
+    3: 'indicators_create',
+    4: 'indicators_search',
+    5: 'tokens_search',
+    6: 'tokens_create',
+    7: 'tokens_delete',
+    8: 'tokens_edit',
+}
+
+
+class Msg(object):
+
+    PING = 1
+    PING_WRITE = 2
+    INDICATORS_CREATE = 3
+    INDICATORS_SEARCH = 4
+    TOKENS_SEARCH = 5
+    TOKENS_CREATE = 6
+    TOKENS_DELETE = 7
+    TOKENS_EDIT = 8
+
+    def __init__(self, *args, **kwargs):
+        for k in kwargs:
+            if isinstance(kwargs[k], str):
+                kwargs[k] = kwargs[k].encode('utf-8')
+
+        self.id = kwargs.get('id')
+        self.client_id = kwargs.get('client_id')
+        self.mtype = kwargs.get('mtype')
+        self.token = kwargs.get('token')
+        self.data = kwargs.get('data')
+        self.null = ''.encode('utf-8')
+
+    # from str to int
+    def mtype_to_int(self, mtype):
+        for m in MAP:
+            if MAP[m] == mtype:
+                return m
+
+    def __repr__(self):
+        m = {
+            'id': self.id,
+            'mtype': self.mtype,
+            'token': self.token,
+            'data': self.data,
+        }
+
+        return json.dumps(m)
+
+    def recv(self, s):
+        m = s.recv_multipart()
+
+        if len(m) == 6:
+            id, client_id, null, token, mtype, data = m
+            mtype = msgpack.unpackb(mtype)
+            mtype = MAP[mtype]
+            return id, client_id, token.decode('utf-8'), mtype, data.decode('utf-8')
+
+        elif len(m) == 5:
+            id, null, token, mtype, data = m
+            mtype = msgpack.unpackb(mtype)
+            mtype = MAP[mtype]
+            return id, token.decode('utf-8'), mtype, data.decode('utf-8')
+
+        else:
+            id, token, mtype, data = m
+            mtype = msgpack.unpackb(mtype)
+            mtype = MAP[mtype]
+            return id, token.decode('utf-8'), mtype, data.decode('utf-8')
+
+    def send(self, s):
+        m = []
+        if self.id:
+            m.append(self.id)
+
+        if self.client_id:
+            m.append(self.client_id)
+
+        if len(m) > 0:
+            m.append(self.null)
+
+        if self.token:
+            m.append(self.token)
+
+        if self.mtype:
+            if isinstance(self.mtype, bytes):
+                self.mtype = self.mtype_to_int(self.mtype.decode('utf-8'))
+
+            m.append(msgpack.packb(self.mtype))
+
+        if isinstance(self.data, dict):
+            self.data = [self.data]
+
+        if isinstance(self.data, list):
+            self.data = json.dumps(self.data)
+
+        if isinstance(self.data, str):
+            self.data = self.data.encode('utf-8')
+
+        m.append(self.data)
+
+        logger.debug('sending...')
+        s.send_multipart(m)
