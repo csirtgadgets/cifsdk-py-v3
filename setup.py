@@ -53,7 +53,8 @@ setup(
         'requests>=2.6.0',
         'urllib3>=1.10.2',
         'csirtg_indicator',
-        'msgpack-python>=0.4.8,<0.5.0'
+        'msgpack-python>=0.4.8,<0.5.0',
+        'ujson'
     ],
     scripts=[],
     entry_points={
