@@ -2,6 +2,7 @@ import ujson as json
 from pprint import pprint
 import msgpack
 import logging
+from cifsdk.constants import PYVERSION
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,10 @@ class Msg(object):
     def __init__(self, *args, **kwargs):
         for k in kwargs:
             if isinstance(kwargs[k], str):
-                kwargs[k] = kwargs[k].encode('utf-8')
+                try:
+                    kwargs[k] = kwargs[k].encode('utf-8')
+                except UnicodeDecodeError:
+                    pass
 
         self.id = kwargs.get('id')
         self.client_id = kwargs.get('client_id')
