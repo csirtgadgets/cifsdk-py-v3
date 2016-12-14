@@ -1,6 +1,7 @@
 import time
 import json
 from cifsdk.client import Client
+from cifsdk.msg import Msg
 from cifsdk.exceptions import AuthError, CIFConnectionError, TimeoutError, InvalidSearch
 from cifsdk.constants import PYVERSION
 import logging
@@ -63,9 +64,7 @@ class ZMQ(Client):
         sent = False
         while not sent and retries > 0:
             try:
-                self.socket.send_multipart([self.token.encode(ENCODING_DEFAULT),
-                                            mtype.encode(ENCODING_DEFAULT),
-                                            data])
+                Msg(mtype=mtype, token=self.token, data=data).send(self.socket)
                 sent = True
             except zmq.error.Again:
                 logger.warning('timeout... retrying in 5s')
@@ -179,12 +178,12 @@ class ZMQ(Client):
 
     def ping(self, write=False):
         if write:
-            return self._send('ping_write')
+            return self._send(Msg.PING_WRITE)
         else:
-            return self._send('ping')
+            return self._send(Msg.PING)
 
     def indicators_search(self, filters):
-        rv = self._send('indicators_search', json.dumps(filters))
+        rv = self._send(Msg.INDICATORS_SEARCH, json.dumps(filters))
         return rv
 
     def indicators_create(self, data, nowait=False):
@@ -196,22 +195,22 @@ class ZMQ(Client):
 
         if self.fireball:
             logger.info('using fireball mode')
-            data = self._send_fireball("indicators_create", data)
+            data = self._send_fireball(Msg.INDICATORS_CREATE, data)
         else:
-            data = self._send('indicators_create', data, nowait=nowait)
+            data = self._send(Msg.INDICATORS_CREATE, data, nowait=nowait)
 
         return data
 
     def tokens_search(self, filters={}):
-        return self._send('tokens_search', json.dumps(filters))
+        return self._send(Msg.TOKENS_SEARCH, json.dumps(filters))
 
     def tokens_create(self, data):
-        return self._send('tokens_create', data)
+        return self._send(Msg.TOKENS_CREATE, data)
 
     def tokens_delete(self, data):
-        return self._send('tokens_delete', data)
+        return self._send(Msg.TOKENS_DELETE, data)
 
     def tokens_edit(self, data):
-        return self._send('tokens_edit', data)
+        return self._send(Msg.TOKENS_EDIT, data)
 
 Plugin = ZMQ
