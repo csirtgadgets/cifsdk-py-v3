@@ -77,7 +77,7 @@ class Msg(object):
             mtype = MAP[mtype]
             return id, token.decode('utf-8'), mtype, data.decode('utf-8')
 
-    def send(self, s):
+    def to_list(self):
         m = []
         if self.id:
             m.append(self.id)
@@ -107,6 +107,10 @@ class Msg(object):
             self.data = self.data.encode('utf-8')
 
         m.append(self.data)
+        return m
+
+    def send(self, s):
+        m = self.to_list()
 
         logger.debug('sending...')
         s.send_multipart(m)
