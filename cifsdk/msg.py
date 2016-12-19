@@ -95,8 +95,10 @@ class Msg(object):
         if self.token:
             if isinstance(self.token, str):
                 self.token = self.token.encode('utf-8')
-            if isinstance(self.token, unicode):
-                self.token = self.token.encode('utf-8')
+
+            if PYVERSION == 2:
+                if isinstance(self.token, unicode):
+                    self.token = self.token.encode('utf-8')
 
             m.append(self.token)
 
