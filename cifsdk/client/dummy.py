@@ -1,5 +1,6 @@
 from pprint import pprint
 from cifsdk.client.plugin import Client
+import ujson as json
 
 
 class Dummy(Client):
@@ -20,10 +21,13 @@ class Dummy(Client):
 
         return data
 
-    def indicators_search(self, data):
+    def indicators_search(self, data, decode=True):
         if type(data) == dict:
             data = [data]
 
-        return data
+        if decode:
+            return data
+
+        return json.dumps({'data': data, 'status': 'success', 'message': ''}).encode('utf-8')
 
 Plugin = Dummy
