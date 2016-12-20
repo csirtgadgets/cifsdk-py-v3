@@ -6,6 +6,7 @@ from cifsdk.exceptions import AuthError, CIFConnectionError, TimeoutError, Inval
 from cifsdk.constants import PYVERSION
 import logging
 import os
+import zlib
 
 from pprint import pprint
 
@@ -39,11 +40,21 @@ class ZMQ(Client):
         logger.debug('token: {}'.format(self.token))
         logger.debug('remote: {}'.format(self.remote))
 
-    def _recv(self):
+    def _recv(self, decode=True):
         mtype, data = self.socket.recv_multipart()
+
+        if not decode:
+            return data
+        
         data = json.loads(data.decode('utf-8'))
 
         if data.get('status') == 'success':
+            if data.get('data'):
+                try:
+                    data['data'] = zlib.decompress(data['data'])
+                except (zlib.error, TypeError):
+                    pass
+
             return data.get('data')
         elif data.get('message') == 'unauthorized':
             raise AuthError('unauthorized')
@@ -54,7 +65,8 @@ class ZMQ(Client):
             logger.error(data.get('data'))
             raise RuntimeError(data.get('message'))
 
-    def _send(self, mtype, data='[]', retries=RETRIES, timeout=SNDTIMEO, retry_sleep=RETRY_SLEEP, nowait=False):
+    def _send(self, mtype, data='[]', retries=RETRIES, timeout=SNDTIMEO, retry_sleep=RETRY_SLEEP, nowait=False,
+              decode=True):
         logger.debug('connecting to: %s' % self.remote)
         self.socket.connect(self.remote)
 
@@ -83,7 +95,7 @@ class ZMQ(Client):
             retries = RETRIES
             while retries > 0:
                 try:
-                    return self._recv()
+                    return self._recv(decode=decode)
                 except zmq.error.Again:
                     logger.warn('timeout trying to receive, retrying...')
                     retries -= 1
@@ -182,8 +194,8 @@ class ZMQ(Client):
         else:
             return self._send(Msg.PING)
 
-    def indicators_search(self, filters):
-        rv = self._send(Msg.INDICATORS_SEARCH, json.dumps(filters))
+    def indicators_search(self, filters, decode=True):
+        rv = self._send(Msg.INDICATORS_SEARCH, json.dumps(filters), decode=decode)
         return rv
 
     def indicators_create(self, data, nowait=False):
