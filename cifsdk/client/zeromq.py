@@ -45,7 +45,7 @@ class ZMQ(Client):
 
         if not decode:
             return data
-        
+
         data = json.loads(data.decode('utf-8'))
 
         if data.get('status') == 'success':
