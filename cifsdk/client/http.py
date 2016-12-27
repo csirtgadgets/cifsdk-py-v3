@@ -9,9 +9,19 @@ import zlib
 from base64 import b64decode
 import binascii
 from cifsdk.client.plugin import Client
+import os
+
+requests.packages.urllib3.disable_warnings()
+
+TRACE = os.environ.get('CIFSDK_CLIENT_HTTP_TRACE')
 
 logger = logging.getLogger(__name__)
-requests.packages.urllib3.disable_warnings()
+
+logger.setLevel(logging.ERROR)
+
+if TRACE:
+    logger.setLevel(logging.DEBUG)
+
 
 class HTTP(Client):
 

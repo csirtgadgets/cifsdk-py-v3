@@ -23,6 +23,15 @@ FIREBALL_SIZE = 500
 
 logger = logging.getLogger(__name__)
 
+TRACE = os.environ.get('CIFSDK_CLIENT_ZEROMQ_TRACE')
+
+logger = logging.getLogger(__name__)
+
+logger.setLevel(logging.ERROR)
+
+if TRACE:
+    logger.setLevel(logging.DEBUG)
+
 
 class ZMQ(Client):
     def __init__(self, remote, token, **kwargs):
