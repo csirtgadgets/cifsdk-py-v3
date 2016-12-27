@@ -166,6 +166,25 @@ def main():
             logger.error('unauthorized')
         else:
             print(FORMATS[options.get('format')](data=rv))
+
+    elif options.get('tags'):
+        logger.info("filtering for {0}".format(options.get("tags")))
+        try:
+            rv = cli.indicators_search({
+                'tags': options['tags'],
+                'limit': options['limit'],
+                'nolog': options['nolog']
+            }
+            )
+        except RuntimeError as e:
+            import traceback
+            traceback.print_exc()
+            logger.error(e)
+        except AuthError as e:
+            logger.error('unauthorized')
+        else:
+            print(FORMATS[options.get('format')](data=rv))
+
     elif options.get("submit"):
         logger.info("submitting {0}".format(options.get("submit")))
         i = Indicator(indicator=args.indicator, tags=args.tags, confidence=args.confidence)
