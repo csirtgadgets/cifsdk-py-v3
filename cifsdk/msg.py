@@ -3,8 +3,14 @@ from pprint import pprint
 import msgpack
 import logging
 from cifsdk.constants import PYVERSION
+import os
 
+TRACE = os.environ.get('CIFSDK_CLIENT_MSG_TRACE')
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
+
+if TRACE:
+    logger.setLevel(logging.DEBUG)
 
 MAP = {
     1: 'ping',
