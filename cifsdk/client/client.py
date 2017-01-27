@@ -7,12 +7,13 @@ import textwrap
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
-from cifsdk.constants import CONFIG_PATH, REMOTE_ADDR, TOKEN, SEARCH_LIMIT, FORMAT
+from cifsdk.constants import CONFIG_PATH, REMOTE_ADDR, TOKEN, SEARCH_LIMIT, FORMAT, FEED_LIMIT, FEED_DAYS_LIMIT
 from cifsdk.exceptions import AuthError
 from csirtg_indicator.format import FORMATS
 from cifsdk.utils import setup_logging, get_argument_parser, read_config
 from csirtg_indicator import Indicator
 from pprint import pprint
+import arrow
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,13 @@ def main():
 
     p.add_argument('--no-verify-ssl', action='store_true')
 
+    p.add_argument('--last-day', action="store_true", help='auto-sets reporttime to 23 hours and 59 seconds ago '
+                                                           '(current time UTC) and reporttime-end to "now"')
+    p.add_argument('--last-hour', action='store_true', help='auto-sets reporttime to the beginning of the previous full'
+                                                            ' hour and reporttime-end to end of previous full hour')
+    p.add_argument('--days', help='filter results within last X days')
+    p.add_argument('--today', help='auto-sets reporttime to today, 00:00:00Z (UTC)', action='store_true')
+
     args = p.parse_args()
 
     setup_logging(args)
@@ -116,81 +124,64 @@ def main():
             else:
                 logger.error('ping failed')
                 raise RuntimeError
-    elif options.get('feed'):
-        logger.info('searching for {}'.format(options['itype']))
-        try:
-            rv = cli.feed({
-                'itype': options['itype'],
-                'limit': options['limit'],
-            })
-        except AuthError as e:
-            logger.error('unauthorized')
-        except RuntimeError as e:
-            import traceback
-            traceback.print_exc()
-            logger.error(e)
-        else:
-            print(FORMATS[options.get('format')](data=rv))
+        raise SystemExit
 
-    elif options.get('itype'):
-        logger.info('searching for {}'.format(options['itype']))
-        try:
-            rv = cli.search({
-                'itype': options['itype'],
-                'limit': options['limit'],
-                'provider': options.get('provider'),
-                'indicator': options.get('search')
-            })
-        except AuthError as e:
-            logger.error('unauthorized')
-        except RuntimeError as e:
-            import traceback
-            traceback.print_exc()
-            logger.error(e)
-        else:
-            print(FORMATS[options.get('format')](data=rv))
-    elif options.get('search'):
-        logger.info("searching for {0}".format(options.get("search")))
-        try:
-            rv = cli.indicators_search({
-                    'indicator': options['search'],
-                    'limit': options['limit'],
-                    'nolog': options['nolog']
-                }
-            )
-        except RuntimeError as e:
-            import traceback
-            traceback.print_exc()
-            logger.error(e)
-        except AuthError as e:
-            logger.error('unauthorized')
-        else:
-            print(FORMATS[options.get('format')](data=rv))
-
-    elif options.get('tags'):
-        logger.info("filtering for {0}".format(options.get("tags")))
-        try:
-            rv = cli.indicators_search({
-                'tags': options['tags'],
-                'limit': options['limit'],
-                'nolog': options['nolog']
-            }
-            )
-        except RuntimeError as e:
-            import traceback
-            traceback.print_exc()
-            logger.error(e)
-        except AuthError as e:
-            logger.error('unauthorized')
-        else:
-            print(FORMATS[options.get('format')](data=rv))
-
-    elif options.get("submit"):
+    if options.get("submit"):
         logger.info("submitting {0}".format(options.get("submit")))
         i = Indicator(indicator=args.indicator, tags=args.tags, confidence=args.confidence)
         rv = cli.indicators_create(i)
 
         logger.info('success id: {}'.format(rv))
+        raise SystemExit
+
+    filters = {
+        'itype': options['itype'],
+        'limit': options['limit'],
+        'provider': options.get('provider'),
+        'indicator': options.get('search'),
+        'nolog': options['nolog'],
+        'tags': options['tags'],
+        'confidence': options.get('confidence')
+    }
+
+    if args.last_day:
+        filters['days'] = '1'
+
+    if args.last_hour:
+        filters['hours'] = '1'
+
+    if args.days:
+        filters['days'] = args.days
+
+    if args.today:
+        now = arrow.utcnow()
+        filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDT00:00:00'))
+
+    if options.get('feed'):
+        if not filters.get('confidence'):
+            filters['confidence'] = 8
+
+        if not filters.get('reporttime') and not filters.get('day') and not filters.get('hour'):
+            filters['days'] = FEED_DAYS_LIMIT
+
+        if args.limit == SEARCH_LIMIT:
+            filters['limit'] = FEED_LIMIT
+
+        try:
+            rv = cli.feed(filters=filters)
+        except AuthError as e:
+            logger.error('unauthorized')
+        else:
+            print(FORMATS[options.get('format')](data=rv))
+
+        raise SystemExit
+
+    try:
+        rv = cli.search(filters)
+    except AuthError as e:
+        logger.error('unauthorized')
+    else:
+        print(FORMATS[options.get('format')](data=rv))
 
 if __name__ == "__main__":
     main()

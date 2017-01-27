@@ -29,6 +29,8 @@ ROUTER_ADDR = "ipc://{}".format(os.path.join(RUNTIME_PATH, 'router.ipc'))
 ROUTER_ADDR = os.environ.get('CIF_ROUTER_ADDR', ROUTER_ADDR)
 
 SEARCH_LIMIT = os.environ.get('CIF_SEARCH_LIMIT', 500)
+FEED_LIMIT = os.environ.get('CIF_FEED_LIMIT', 50000)
+FEED_DAYS_LIMIT = os.environ.get('CIF_FEED_DAYS_LIMIT', 21)
 
 TOKEN = os.environ.get('CIF_TOKEN', None)
 FORMAT = os.environ.get('CIF_FORMAT', 'table')

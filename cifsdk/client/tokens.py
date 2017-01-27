@@ -129,7 +129,7 @@ def main():
                     rv[c] = arrow.get(rv[c]).format('YYYY-MM-DDTHH:MM:ss')
                     rv[c] = '{}Z'.format(rv[c])
 
-                if c == 'expires' and rv[c] and rv.get(c):
+                if c == 'expires' and rv.get(c):
                     rv[c] = arrow.get(rv[c]).format('YYYY-MM-DDTHH:MM:ss')
                     rv[c] = '{}Z'.format(rv[c])
 
