@@ -81,11 +81,24 @@ class Msg(object):
             mtype = MAP[mtype]
             return id, token.decode('utf-8'), mtype, data.decode('utf-8')
 
-        else:
+        elif len(m) == 4:
             id, token, mtype, data = m
             mtype = msgpack.unpackb(mtype)
             mtype = MAP[mtype]
             return id, token.decode('utf-8'), mtype, data.decode('utf-8')
+
+        elif len(m) == 3:
+            id, mtype, data = m
+            try:
+                mtype = msgpack.unpackb(mtype)
+                mtype = MAP[mtype]
+            except msgpack.exceptions.ExtraData:
+                pass
+            return id, mtype, data.decode('utf-8')
+
+        else:
+            mtype, data = m
+            return mtype, data.decode("utf-8")
 
     def to_list(self):
         m = []

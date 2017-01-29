@@ -1,6 +1,6 @@
 
 class CIFException(Exception):
-    def __init__(self, msg):
+    def __init__(self, msg='Unknown'):
         self.msg = "{}".format(msg)
 
     def __str__(self):
@@ -16,11 +16,24 @@ class StoreSubmissionFailed(CIFException):
 
 
 class AuthError(CIFException):
-    pass
+    def __init__(self, msg='Unauthorized'):
+        self.msg = msg
 
 
 class TimeoutError(CIFException):
     pass
 
+
 class InvalidSearch(CIFException):
-    pass
+    def __init__(self, msg='Invalid Search'):
+        self.msg = msg
+
+
+class NotFound(CIFException):
+    def __init__(self, msg='Not Found'):
+        self.msg = msg
+
+
+class SubmissionFailed(CIFException):
+    def __init__(self, msg='Submission Failed'):
+        self.msg = msg
