@@ -2,7 +2,7 @@ import logging
 import requests
 import time
 import json
-from cifsdk.exceptions import AuthError, TimeoutError
+from cifsdk.exceptions import AuthError, TimeoutError, NotFound, SubmissionFailed
 from cifsdk.constants import VERSION
 from pprint import pprint
 import zlib
@@ -40,32 +40,31 @@ class HTTP(Client):
         self.session.headers['Content-Type'] = 'application/json'
         self.session.headers['Accept-Encoding'] = 'gzip'
 
+    def _check_status(self, resp, expect=200):
+        if resp.status_code == 401:
+            raise AuthError()
+
+        if resp.status_code == 404:
+            raise NotFound()
+
+        if resp.status_code == 408:
+            raise TimeoutError()
+
+        if resp.status_code == 422:
+            raise SubmissionFailed()
+
+        if resp.status_code != expect:
+            raise RuntimeError(resp.content)
+
     def _get(self, uri, params={}):
         if not uri.startswith('http'):
             uri = self.remote + uri
-        body = self.session.get(uri, params=params, verify=self.verify_ssl)
 
-        if body.status_code > 303:
-            err = 'request failed: %s' % str(body.status_code)
-            logger.error(err)
+        resp = self.session.get(uri, params=params, verify=self.verify_ssl)
 
-            if body.status_code == 401:
-                raise AuthError('invalid token')
-            elif body.status_code == 404:
-                err = 'not found'
-                raise RuntimeError(err)
-            elif body.status_code == 408:
-                raise TimeoutError('timeout')
-            else:
-                try:
-                    err = json.loads(body.content).get('message')
-                    raise RuntimeError(err)
-                except ValueError as e:
-                    err = body.content
-                    logger.error(err)
-                    raise RuntimeError(err)
+        self._check_status(resp, expect=200)
 
-        data = body.content
+        data = resp.content
         try:
             data = zlib.decompress(b64decode(data))
         except (TypeError, binascii.Error) as e:
@@ -91,84 +90,21 @@ class HTTP(Client):
         if self.nowait:
             uri = '{}?nowait=1'.format(uri)
 
-        body = self.session.post(uri, data=data, verify=self.verify_ssl)
+        resp = self.session.post(uri, data=data, verify=self.verify_ssl)
 
-        if body.status_code > 303:
-            err = 'request failed: %s' % str(body.status_code)
-            logger.debug(err)
-            err = body.content
+        self._check_status(resp, expect=201)
 
-            if body.status_code == 401:
-                raise AuthError('unauthorized')
-            elif body.status_code == 404:
-                err = 'not found'
-                raise RuntimeError(err)
-            elif body.status_code == 408:
-                raise TimeoutError('timeout')
-            else:
-                try:
-                    err = json.loads(err.decode('utf-8')).get('message')
-                except ValueError as e:
-                    err = body.content
-
-                logger.error(err)
-                raise RuntimeError(err)
-
-        logger.debug(body.content.decode('utf-8'))
-        body = json.loads(body.content.decode('utf-8'))
-        return body
+        return json.loads(resp.content.decode('utf-8'))
 
     def _delete(self, uri, data):
-        body = self.session.delete(uri, data=json.dumps(data))
-
-        if body.status_code > 303:
-            err = 'request failed: %s' % str(body.status_code)
-            logger.debug(err)
-            err = body.content
-
-            if body.status_code == 401:
-                raise AuthError('unauthorized')
-            elif body.status_code == 404:
-                err = 'not found'
-                raise RuntimeError(err)
-            else:
-                try:
-                    err = json.loads(err).get('message')
-                except ValueError as e:
-                    err = body.content
-
-                logger.error(err)
-                raise RuntimeError(err)
-
-        logger.debug(body.content)
-        body = json.loads(body.content)
-        return body
+        resp = self.session.delete(uri, data=json.dumps(data))
+        self._check_status(resp)
+        return json.loads(resp.content)
 
     def _patch(self, uri, data):
-        body = self.session.patch(uri, data=json.dumps(data))
-
-        if body.status_code > 303:
-            err = 'request failed: %s' % str(body.status_code)
-            logger.debug(err)
-            err = body.content
-
-            if body.status_code == 401:
-                raise AuthError('unauthorized')
-            elif body.status_code == 404:
-                err = 'not found'
-                raise RuntimeError(err)
-            else:
-                try:
-                    err = json.loads(err).get('message')
-                except ValueError as e:
-                    err = body.content
-
-                logger.error(err)
-                raise RuntimeError(err)
-
-        logger.debug(body.content)
-        body = json.loads(body.content)
-        return body
+        resp = self.session.patch(uri, data=json.dumps(data))
+        self._check_status(resp)
+        return json.loads(resp.content)
 
     def indicators_search(self, filters):
         rv = self._get('/search', params=filters)
