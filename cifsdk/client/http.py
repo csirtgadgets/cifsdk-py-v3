@@ -74,7 +74,13 @@ class HTTP(Client):
 
         msgs = json.loads(data.decode('utf-8'))
 
-        if isinstance(msgs['data'], list):
+        if not msgs.get('status') and not msgs.get('message') == 'success':
+            raise RuntimeError(msgs)
+
+        if msgs.get('status') and msgs['status'] == 'failure':
+            raise InvalidSearch(msgs['message'])
+
+        if isinstance(msgs.get('data'), list):
             for m in msgs['data']:
                 if m.get('message'):
                     try:
