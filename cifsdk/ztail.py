@@ -37,7 +37,7 @@ def main():
     )
 
     p.add_argument('--no-verify-ssl', help='turn TLS/SSL verification OFF', action='store_true')
-    p.add_argument('--format', default='csv')
+    p.add_argument('--format', default='table')
     p.add_argument('--cycle', help='specify a cycle in which to run', default=5)
     p.add_argument('--filters', help='specify data filters to use', default='itype=ipv4,confidence=7,limit=10')
     p.add_argument('--remote', default=REMOTE_ADDR)
@@ -78,8 +78,12 @@ def main():
         filters['reporttime'] = '{},{}'.format(start, end)
         logger.debug('searching {} - {}'.format(start, end))
         resp = client.indicators_search(filters)
-        for l in get_lines_table(resp):
-            print(l)
+        if args.format == 'csv':
+            for l in get_lines_csv(resp):
+                print(l)
+        else:
+            for l in get_lines_table(resp):
+                print(l)
 
         logger.debug('sleeping for {}m'.format(args.cycle))
         sleep(cycle)
