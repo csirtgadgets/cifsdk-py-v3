@@ -30,6 +30,7 @@ omit =
     cifsdk/utils/zsocket.py
     cifsdk/client/*
     cifsdk/utils/__init__.py
+    cifsdk/ztail.py
 
 [html]
 directory = coverage_html_report
