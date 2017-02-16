@@ -26,7 +26,8 @@ def main():
     p = ArgumentParser(
         description=textwrap.dedent('''\
             Env Variables:
-
+                CIF_TOKEN
+                CIF_REMOTE
 
             example usage:
                 $ cif-tail
