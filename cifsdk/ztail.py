@@ -87,6 +87,9 @@ def main():
 
         logger.debug('sleeping for {}m'.format(args.cycle))
         sleep(cycle)
+
+        # todo- this needs some work, maybe use last record if there was one?
+        # what if there wasn't?
         start = arrow.get(arrow.get(end).timestamp + 1)
         end = arrow.get((arrow.utcnow().timestamp - 120))
 
