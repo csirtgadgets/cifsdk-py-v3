@@ -19,7 +19,26 @@ from csirtg_indicator.format.zcsv import get_lines as get_lines_csv
 
 logger = logging.getLogger(__name__)
 
+class Delayer:
+    def __init__(self, initial=0, lower=1, upper=60, factor=2, sleep=sleep):
+        self.initial = initial
+        self.lower = lower
+        self.upper = upper
+        self.factor = factor
+        self._sleep = sleep
+        self.reset()
 
+    def reset(self):
+        self.delay = self.initial
+
+    def sleep(self):
+        logger.debug('sleeping for {}s'.format(self.delay))
+        self._sleep(self.delay)
+        if self.delay == 0:
+            self.delay = self.lower
+        else:
+            self.delay *= self.factor
+            self.delay = min(self.delay, self.upper)
 
 def main():
     p = get_argument_parser()
@@ -50,9 +69,7 @@ def main():
     # setup logging
     setup_logging(args)
 
-    verify_ssl = True
-    if args.no_verify_ssl:
-        verify_ssl = False
+    verify_ssl = not args.no_verify_ssl
 
     filters = {}
     for k in args.filters.split(','):
@@ -67,6 +84,7 @@ def main():
     start = arrow.get(start)
 
     cycle = (int(args.cycle) * 60)
+    delay = Delayer(upper=cycle)
 
     # we want a 120s buffer for things that are being generated "now"
     end = arrow.get((arrow.utcnow().timestamp - 120))
@@ -78,16 +96,21 @@ def main():
 
         filters['reporttime'] = '{},{}'.format(start, end)
         logger.debug('searching {} - {}'.format(start, end))
-        resp = client.indicators_search(filters)
-        if args.format == 'csv':
-            for l in get_lines_csv(resp):
-                print(l)
-        else:
-            for l in get_lines_table(resp):
-                print(l)
+        try:
+            resp = client.indicators_search(filters)
+        except Exception:
+            logger.exception("CIF API Error")
+            resp = []
+        if resp:
+            delay.reset()
+            if args.format == 'csv':
+                for l in get_lines_csv(resp):
+                    print(l)
+            else:
+                for l in get_lines_table(resp):
+                    print(l)
 
-        logger.debug('sleeping for {}m'.format(args.cycle))
-        sleep(cycle)
+        delay.sleep()
 
         # todo- this needs some work, maybe use last record if there was one?
         # what if there wasn't?
