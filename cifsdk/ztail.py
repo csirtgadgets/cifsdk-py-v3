@@ -50,9 +50,7 @@ def main():
     # setup logging
     setup_logging(args)
 
-    verify_ssl = True
-    if args.no_verify_ssl:
-        verify_ssl = False
+    verify_ssl = not args.no_verify_ssl
 
     filters = {}
     for k in args.filters.split(','):
