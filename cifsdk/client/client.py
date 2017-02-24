@@ -172,6 +172,10 @@ def main():
             rv = cli.feed(filters=filters)
         except AuthError as e:
             logger.error('unauthorized')
+        except KeyboardInterrupt:
+            pass
+        except Exception as e:
+            logger.error(e)
         else:
             print(FORMATS[options.get('format')](data=rv))
 
@@ -181,6 +185,10 @@ def main():
         rv = cli.search(filters)
     except AuthError as e:
         logger.error('unauthorized')
+    except KeyboardInterrupt:
+        pass
+    except Exception as e:
+        logger.error(e)
     else:
         print(FORMATS[options.get('format')](data=rv))
 
