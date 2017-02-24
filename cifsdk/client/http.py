@@ -2,7 +2,7 @@ import logging
 import requests
 import time
 import json
-from cifsdk.exceptions import AuthError, TimeoutError, NotFound, SubmissionFailed
+from cifsdk.exceptions import AuthError, TimeoutError, NotFound, SubmissionFailed, InvalidSearch
 from cifsdk.constants import VERSION
 from pprint import pprint
 import zlib
@@ -41,6 +41,10 @@ class HTTP(Client):
         self.session.headers['Accept-Encoding'] = 'gzip'
 
     def _check_status(self, resp, expect=200):
+        if resp.status_code == 400:
+            r = json.loads(resp.text)
+            raise InvalidSearch(r['message'])
+
         if resp.status_code == 401:
             raise AuthError()
 
