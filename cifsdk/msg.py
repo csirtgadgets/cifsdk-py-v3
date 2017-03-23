@@ -17,10 +17,11 @@ MAP = {
     2: 'ping_write',
     3: 'indicators_create',
     4: 'indicators_search',
-    5: 'tokens_search',
-    6: 'tokens_create',
-    7: 'tokens_delete',
-    8: 'tokens_edit',
+    5: 'indicators_delete',
+    6: 'tokens_search',
+    7: 'tokens_create',
+    8: 'tokens_delete',
+    9: 'tokens_edit',
 }
 
 
@@ -30,10 +31,11 @@ class Msg(object):
     PING_WRITE = 2
     INDICATORS_CREATE = 3
     INDICATORS_SEARCH = 4
-    TOKENS_SEARCH = 5
-    TOKENS_CREATE = 6
-    TOKENS_DELETE = 7
-    TOKENS_EDIT = 8
+    INDICATORS_DELETE = 5
+    TOKENS_SEARCH = 6
+    TOKENS_CREATE = 7
+    TOKENS_DELETE = 8
+    TOKENS_EDIT = 9
 
     def __init__(self, *args, **kwargs):
         for k in kwargs:

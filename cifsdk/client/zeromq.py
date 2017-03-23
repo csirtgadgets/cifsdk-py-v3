@@ -178,5 +178,13 @@ class ZMQ(Client):
 
         return self._send(Msg.INDICATORS_CREATE, data, nowait=nowait)
 
+    def indicators_delete(self, data):
+        if isinstance(data, dict):
+            data = self._kv_to_indicator(data)
+
+        if not isinstance(data, str):
+            data = str(data)
+
+        return self._send(Msg.INDICATORS_DELETE, data)
 
 Plugin = ZMQ

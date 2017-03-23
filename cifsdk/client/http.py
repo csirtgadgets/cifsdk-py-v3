@@ -106,10 +106,17 @@ class HTTP(Client):
 
         return json.loads(resp.content.decode('utf-8'))
 
-    def _delete(self, uri, data):
-        resp = self.session.delete(uri, data=json.dumps(data))
+    def _delete(self, uri, params={}):
+        params = {f: params[f] for f in params if params.get(f)}
+        if params.get('nolog'):
+            del params['nolog']
+
+        if params.get('limit'):
+            del params['limit']
+
+        resp = self.session.delete(uri, data=json.dumps(params), verify=self.verify_ssl)
         self._check_status(resp)
-        return json.loads(resp.content)
+        return json.loads(resp.content.decode('utf-8'))
 
     def _patch(self, uri, data):
         resp = self.session.patch(uri, data=json.dumps(data))
@@ -126,6 +133,12 @@ class HTTP(Client):
         uri = "{0}/indicators".format(self.remote)
         logger.debug(uri)
         rv = self._post(uri, data)
+        return rv["data"]
+
+    def indicators_delete(self, filters):
+        uri = "{0}/indicators".format(self.remote)
+        logger.debug(uri)
+        rv = self._delete(uri, params=filters)
         return rv["data"]
 
     def feed(self, filters):

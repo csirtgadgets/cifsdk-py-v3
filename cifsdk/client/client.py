@@ -7,7 +7,8 @@ import textwrap
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
-from cifsdk.constants import CONFIG_PATH, REMOTE_ADDR, TOKEN, SEARCH_LIMIT, FORMAT, FEED_LIMIT, FEED_DAYS_LIMIT, COLUMNS
+from cifsdk.constants import CONFIG_PATH, REMOTE_ADDR, TOKEN, SEARCH_LIMIT, FORMAT, FEED_LIMIT, FEED_DAYS_LIMIT, \
+    COLUMNS, ADVANCED
 from cifsdk.exceptions import AuthError
 from csirtg_indicator.format import FORMATS
 from cifsdk.utils import setup_logging, get_argument_parser, read_config
@@ -91,8 +92,11 @@ def main():
     p.add_argument('--cc')
     p.add_argument('--asn-desc')
     p.add_argument('--rdata')
-    p.add_argument('--no-feed')
+    p.add_argument('--no-feed', action='store_true')
     p.add_argument('--region')
+
+    p.add_argument('--delete', action='store_true')
+    p.add_argument('--id')
 
     args = p.parse_args()
 
@@ -153,7 +157,7 @@ def main():
         'itype': options['itype'],
         'limit': options['limit'],
         'provider': options.get('provider'),
-        'indicator': options.get('search'),
+        'indicator': options.get('search') or options.get('indicator'),
         'nolog': options['nolog'],
         'tags': options['tags'],
         'confidence': options.get('confidence'),
@@ -161,17 +165,21 @@ def main():
         'asn_desc': options.get('asn_desc'),
         'cc': options.get('cc'),
         'region': options.get('region'),
-        'rdata': options.get('rdata')
+        'rdata': options.get('rdata'),
+        'reporttime': options.get('reporttime')
     }
 
     if args.last_day:
         filters['days'] = '1'
+        del filters['reporttime']
 
     if args.last_hour:
         filters['hours'] = '1'
+        del filters['reporttime']
 
     if args.days:
         filters['days'] = args.days
+        del filters['reporttime']
 
     if args.today:
         now = arrow.utcnow()
@@ -181,11 +189,22 @@ def main():
         logger.info('setting feed flag by default, use --no-feed to override')
         options['feed'] = True
 
+    if options.get("delete"):
+        if args.id:
+            filters = {'id': args.id}
+
+        filters = {f: filters[f] for f in filters if filters.get(f)}
+        logger.info("deleting {0}".format(filters))
+        rv = cli.indicators_delete(filters)
+
+        logger.info('deleted: {}'.format(rv))
+        raise SystemExit
+
     if options.get('feed'):
-        if not filters.get('itype'):
+        if not filters.get('itype') and not ADVANCED:
             raise RuntimeError('missing --itype')
 
-        if not filters.get('tags'):
+        if not filters.get('tags') and not ADVANCED:
             raise RuntimeError('missing --tags [phishing|malware|botnet|scanner|pdns|whitelist|...]')
 
         if not filters.get('confidence'):
