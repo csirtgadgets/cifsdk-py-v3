@@ -55,7 +55,7 @@ class HTTP(Client):
             raise TimeoutError()
 
         if resp.status_code == 422:
-            raise SubmissionFailed()
+            raise SubmissionFailed(resp.content)
 
         if resp.status_code != expect:
             raise RuntimeError(resp.content)
