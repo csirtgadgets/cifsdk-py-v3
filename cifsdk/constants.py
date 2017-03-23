@@ -35,6 +35,8 @@ FEED_DAYS_LIMIT = os.environ.get('CIF_FEED_DAYS_LIMIT', 21)
 TOKEN = os.environ.get('CIF_TOKEN', None)
 FORMAT = os.environ.get('CIF_FORMAT', 'table')
 
+ADVANCED = os.getenv('CIF_ADVANCED')
+
 
 PYVERSION = 2
 if sys.version_info > (3,):
