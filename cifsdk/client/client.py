@@ -7,7 +7,7 @@ import textwrap
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
-from cifsdk.constants import CONFIG_PATH, REMOTE_ADDR, TOKEN, SEARCH_LIMIT, FORMAT, FEED_LIMIT, FEED_DAYS_LIMIT
+from cifsdk.constants import CONFIG_PATH, REMOTE_ADDR, TOKEN, SEARCH_LIMIT, FORMAT, FEED_LIMIT, FEED_DAYS_LIMIT, COLUMNS
 from cifsdk.exceptions import AuthError
 from csirtg_indicator.format import FORMATS
 from cifsdk.utils import setup_logging, get_argument_parser, read_config
@@ -56,7 +56,8 @@ def main():
     )
     p.add_argument('--token', help='specify api token', default=TOKEN)
     p.add_argument('--remote', help='specify API remote [default %(default)s]', default=REMOTE_ADDR)
-    p.add_argument('-p', '--ping', action="store_true") # meg?
+    p.add_argument('-p', '--ping', action="store_true")  # meg?
+    p.add_argument('--ping-indef', action="store_true")
     p.add_argument('-q', '--search', help="search")
     p.add_argument('--itype', help='filter by indicator type')  ## need to fix sqlite for non-ascii stuff first
     p.add_argument("--submit", action="store_true", help="submit an indicator")
@@ -84,6 +85,14 @@ def main():
                                                             ' hour and reporttime-end to end of previous full hour')
     p.add_argument('--days', help='filter results within last X days')
     p.add_argument('--today', help='auto-sets reporttime to today, 00:00:00Z (UTC)', action='store_true')
+    p.add_argument('--columns', help='specify output columns [default %(default)s]', default=','.join(COLUMNS))
+
+    p.add_argument('--asn')
+    p.add_argument('--cc')
+    p.add_argument('--asn-desc')
+    p.add_argument('--rdata')
+    p.add_argument('--no-feed')
+    p.add_argument('--region')
 
     args = p.parse_args()
 
@@ -115,13 +124,18 @@ def main():
 
         cli = HTTPClient(args.remote, args.token, verify_ssl=verify_ssl)
 
-    if options.get('ping'):
+    if options.get('ping') or options.get('ping_indef'):
         logger.info('running ping')
-        for num in range(0, 4):
+        n = 4
+        if args.ping_indef:
+            n = 999
+        for num in range(0, n):
             ret = cli.ping()
             if ret != 0:
                 print("roundtrip: {} ms".format(ret))
                 select.select([], [], [], 1)
+                from time import sleep
+                sleep(1)
             else:
                 logger.error('ping failed')
                 raise RuntimeError
@@ -142,7 +156,12 @@ def main():
         'indicator': options.get('search'),
         'nolog': options['nolog'],
         'tags': options['tags'],
-        'confidence': options.get('confidence')
+        'confidence': options.get('confidence'),
+        'asn': options.get('asn'),
+        'asn_desc': options.get('asn_desc'),
+        'cc': options.get('cc'),
+        'region': options.get('region'),
+        'rdata': options.get('rdata')
     }
 
     if args.last_day:
@@ -158,7 +177,17 @@ def main():
         now = arrow.utcnow()
         filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDT00:00:00'))
 
+    if filters.get('itype') and not filters.get('search'):
+        logger.info('setting feed flag by default, use --no-feed to override')
+        options['feed'] = True
+
     if options.get('feed'):
+        if not filters.get('itype'):
+            raise RuntimeError('missing --itype')
+
+        if not filters.get('tags'):
+            raise RuntimeError('missing --tags [phishing|malware|botnet|scanner|pdns|whitelist|...]')
+
         if not filters.get('confidence'):
             filters['confidence'] = 8
 
@@ -170,12 +199,16 @@ def main():
 
         try:
             rv = cli.feed(filters=filters)
+
         except AuthError as e:
             logger.error('unauthorized')
+
         except KeyboardInterrupt:
             pass
+
         except Exception as e:
             logger.error(e)
+
         else:
             print(FORMATS[options.get('format')](data=rv))
 
@@ -183,14 +216,18 @@ def main():
 
     try:
         rv = cli.search(filters)
+
     except AuthError as e:
         logger.error('unauthorized')
+
     except KeyboardInterrupt:
         pass
+
     except Exception as e:
         logger.error(e)
+
     else:
-        print(FORMATS[options.get('format')](data=rv))
+        print(FORMATS[options.get('format')](data=rv, cols=args.columns.split(',')))
 
 if __name__ == "__main__":
     main()
