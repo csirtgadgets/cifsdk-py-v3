@@ -52,7 +52,7 @@ setup(
         'pyzmq>=16.0',
         'requests>=2.6.0',
         'urllib3>=1.10.2',
-        'csirtg_indicator',
+        'csirtg_indicator>=0.0.0b15,<1.0',
         'msgpack-python>=0.4.8,<0.5.0',
         'ujson'
     ],
