@@ -202,10 +202,12 @@ def main():
 
     if options.get('feed'):
         if not filters.get('itype') and not ADVANCED:
-            raise RuntimeError('missing --itype')
+            logger.error('missing --itype')
+            raise SystemExit
 
         if not filters.get('tags') and not ADVANCED:
-            raise RuntimeError('missing --tags [phishing|malware|botnet|scanner|pdns|whitelist|...]')
+            logger.error('missing --tags [phishing|malware|botnet|scanner|pdns|whitelist|...]')
+            raise SystemExit
 
         if not filters.get('confidence'):
             filters['confidence'] = 8
