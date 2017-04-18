@@ -15,9 +15,6 @@ install:
 script:
   - python setup.py test
   - python setup.py sdist bdist bdist_wheel
-  - sudo apt-get install build-essential virtualenvwrapper python-virtualenv devscripts debhelper cdbs
-  - make deb
-  - cp ./pyinstaller-build/dist/cif ~/ && cd ~/ && ./cif -V
 
 notifications:
   email:
