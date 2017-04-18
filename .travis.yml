@@ -2,13 +2,12 @@ sudo: required
 dist: trusty
 language: python
 cache:
-    - pip
-    - apt
+  - pip
+  - apt
 
 python:
-    - 2.7
-    - 3.5
-
+  - 2.7
+  - 3.5
 
 install:
   - pip install -r dev_requirements.txt
@@ -18,9 +17,19 @@ script:
   - python setup.py sdist bdist bdist_wheel
   - sudo apt-get install build-essential virtualenvwrapper python-virtualenv devscripts debhelper cdbs
   - make deb
-  - "cp ./pyinstaller-build/dist/cif ~/ && cd ~/ && ./cif -V"
+  - cp ./pyinstaller-build/dist/cif ~/ && cd ~/ && ./cif -V
 
 notifications:
-    email:
-        on_success: never
-        on_failure: never
+  email:
+    on_success: never
+    on_failure: never
+
+deploy:
+  provider: pypi
+  user: wesyoung
+  password:
+    secure: hkb9E2d6iYS7GZ/nxzQPezC/qgNmKYCJOatA6CTngiaomJLIROjb5A86msRNMDW9h6FlZfgUnShqyx5UnIbOmN5MmDWJy+uOJ34zj5D5a33r+Xn8hQvpEvv7nd/ug27sHO3J6esN+LR5IXjllrrlaku3sRVP/V7SSSHb7oDbCil0Ch4thC3ZXkJe0mcpAbn5o+vtO7BBU18OW/zFQOIMuHa0NwzkwQe7MWbnjbL0iIHS+zDYna5U4uEkFJ8ztEgZrTMYQpkTHlSwuktDlmdhzH9RlJyw0Eyz4r7Y9vMluokU/gLhVSVlel7rrcg+hQcszFujHGXQE1N8QKLAlK8WoR4CmJehxBnLXXJLLpe+qS9OIdHejHRUXyV0eHMvSiM1w+VtgS1NWbUqzp9ICp2+j3oe05pceQNhpScUiA2DOr30JEyIyLfaw9w0kEAvzUvuhzkLUZ+GMJkvPPGLsb7MeLmIadBit+V0T1ZbOqNNlb0xq3AqdOndmplTy/X9+s18/CrBscjNU6scusqddhcKzUUcoxASOfaetBEmrtZASxhB3OZhDH02806ST/Jst7S5j0oClDljicqSL5CWmPYPS6P6C9wiBI8BXQEHNe7Gw/I3ElxUEbnhqa+1/6PJaA9znCznPIwynKsF31mb3ojB70RaUD0QruKAkb1Tjg26kAQ=
+  on:
+    branch: master
+    tags: true
+    condition: $TRAVIS_PYTHON_VERSION = "3.5"
