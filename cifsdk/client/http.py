@@ -18,9 +18,11 @@ TRACE = os.environ.get('CIFSDK_CLIENT_HTTP_TRACE')
 logger = logging.getLogger(__name__)
 
 logger.setLevel(logging.ERROR)
+logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.ERROR)
 
 if TRACE:
     logger.setLevel(logging.DEBUG)
+    logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.DEBUG)
 
 
 class HTTP(Client):
@@ -69,6 +71,10 @@ class HTTP(Client):
         self._check_status(resp, expect=200)
 
         data = resp.content
+
+        s = (int(resp.headers['Content-Length']) / 1024 / 1024)
+        logger.info('processing %.2f megs' % s)
+
         try:
             data = zlib.decompress(b64decode(data))
         except (TypeError, binascii.Error) as e:
