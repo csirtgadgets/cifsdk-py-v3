@@ -37,3 +37,8 @@ class NotFound(CIFException):
 class SubmissionFailed(CIFException):
     def __init__(self, msg='Submission Failed'):
         self.msg = msg
+
+
+class CIFBusy(CIFException):
+    def __init__(self, msg='The system is extremely busy at the moment, try again later.'):
+        self.msg = msg

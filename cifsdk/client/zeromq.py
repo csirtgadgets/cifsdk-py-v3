@@ -2,7 +2,7 @@ import time
 import json
 from cifsdk.client import Client
 from cifsdk.msg import Msg
-from cifsdk.exceptions import AuthError, CIFConnectionError, TimeoutError, InvalidSearch
+from cifsdk.exceptions import AuthError, CIFConnectionError, TimeoutError, InvalidSearch, CIFBusy
 from cifsdk.constants import PYVERSION
 import logging
 import os
@@ -54,6 +54,9 @@ class ZMQ(Client):
 
         if data.get('message') == 'unauthorized':
             raise AuthError()
+
+        if data.get('message') == 'busy':
+            raise CIFBusy()
 
         if data.get('message') == 'invalid search':
             raise InvalidSearch()

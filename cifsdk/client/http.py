@@ -2,7 +2,7 @@ import logging
 import requests
 import time
 import json
-from cifsdk.exceptions import AuthError, TimeoutError, NotFound, SubmissionFailed, InvalidSearch
+from cifsdk.exceptions import AuthError, TimeoutError, NotFound, SubmissionFailed, InvalidSearch, CIFBusy
 from cifsdk.constants import VERSION
 from pprint import pprint
 import zlib
@@ -57,7 +57,11 @@ class HTTP(Client):
             raise TimeoutError()
 
         if resp.status_code == 422:
-            raise SubmissionFailed(resp.content)
+            msg = json.loads(resp.text)
+            raise SubmissionFailed(msg['message'])
+
+        if resp.status_code == 503:
+            raise CIFBusy()
 
         if resp.status_code != expect:
             raise RuntimeError(resp.content)

@@ -185,7 +185,7 @@ def main():
         now = arrow.utcnow()
         filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDT00:00:00'))
 
-    if filters.get('itype') and not filters.get('search'):
+    if filters.get('itype') and not filters.get('search') and not args.no_feed:
         logger.info('setting feed flag by default, use --no-feed to override')
         options['feed'] = True
 
