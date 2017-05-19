@@ -10,6 +10,7 @@ from base64 import b64decode
 import binascii
 from cifsdk.client.plugin import Client
 import os
+import gzip
 
 requests.packages.urllib3.disable_warnings()
 
@@ -40,7 +41,7 @@ class HTTP(Client):
         self.session.headers['User-Agent'] = 'cifsdk-py/{}'.format(VERSION)
         self.session.headers['Authorization'] = 'Token token=' + self.token
         self.session.headers['Content-Type'] = 'application/json'
-        self.session.headers['Accept-Encoding'] = 'gzip'
+        self.session.headers['Accept-Encoding'] = 'deflate'
 
     def _check_status(self, resp, expect=200):
         if resp.status_code == 400:
@@ -79,12 +80,9 @@ class HTTP(Client):
         s = (int(resp.headers['Content-Length']) / 1024 / 1024)
         logger.info('processing %.2f megs' % s)
 
-        try:
-            data = zlib.decompress(b64decode(data))
-        except (TypeError, binascii.Error) as e:
-            pass
-        except Exception as e:
-            pass
+        if resp.headers.get('Content-Encoding'):
+            if resp.headers['Content-Encoding'] == 'gzip':
+                data = gzip.decompress(data)
 
         msgs = json.loads(data.decode('utf-8'))
 
