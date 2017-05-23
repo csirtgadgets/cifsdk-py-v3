@@ -11,6 +11,7 @@ import binascii
 from cifsdk.client.plugin import Client
 import os
 import gzip
+import zlib
 
 requests.packages.urllib3.disable_warnings()
 
@@ -108,7 +109,11 @@ class HTTP(Client):
         if self.nowait:
             uri = '{}?nowait=1'.format(uri)
 
-        resp = self.session.post(uri, data=data, verify=self.verify_ssl)
+        data = zlib.compress(data)
+        headers = {
+            'Content-Encoding': 'deflate'
+        }
+        resp = self.session.post(uri, data=data, verify=self.verify_ssl, headers=headers)
 
         self._check_status(resp, expect=201)
 
