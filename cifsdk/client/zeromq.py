@@ -4,6 +4,7 @@ from cifsdk.client import Client
 from cifsdk.msg import Msg
 from cifsdk.exceptions import AuthError, CIFConnectionError, TimeoutError, InvalidSearch, CIFBusy
 from cifsdk.constants import PYVERSION
+from csirtg_indicator import Indicator
 import logging
 import os
 import zlib
@@ -30,6 +31,9 @@ logger.setLevel(logging.ERROR)
 
 if TRACE:
     logger.setLevel(logging.DEBUG)
+
+if PYVERSION == 3:
+    basestring = (str, bytes)
 
 
 class ZMQ(Client):
@@ -76,7 +80,7 @@ class ZMQ(Client):
 
         self.socket.connect(self.remote)
 
-        if type(data) == str:
+        if isinstance(data, str):
             data = data.encode('utf-8')
 
         Msg(mtype=mtype, token=self.token, data=data).send(self.socket)
@@ -173,7 +177,7 @@ class ZMQ(Client):
         if isinstance(data, dict):
             data = self._kv_to_indicator(data)
 
-        if not isinstance(data, str):
+        if isinstance(data, Indicator):
             data = str(data)
 
         if fireball:
@@ -186,7 +190,7 @@ class ZMQ(Client):
         if isinstance(data, dict):
             data = self._kv_to_indicator(data)
 
-        if not isinstance(data, str):
+        if isinstance(data, Indicator):
             data = str(data)
 
         return self._send(Msg.INDICATORS_DELETE, data)

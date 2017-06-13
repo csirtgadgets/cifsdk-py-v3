@@ -10,7 +10,6 @@ from base64 import b64decode
 import binascii
 from cifsdk.client.plugin import Client
 import os
-import gzip
 import zlib
 
 requests.packages.urllib3.disable_warnings()
@@ -83,10 +82,6 @@ class HTTP(Client):
         s = (int(resp.headers['Content-Length']) / 1024 / 1024)
         logger.info('processing %.2f megs' % s)
 
-        if resp.headers.get('Content-Encoding'):
-            if resp.headers['Content-Encoding'] == 'gzip':
-                data = gzip.decompress(data)
-
         msgs = json.loads(data.decode('utf-8'))
 
         if not msgs.get('status') and not msgs.get('message') == 'success':
@@ -111,7 +106,7 @@ class HTTP(Client):
         if self.nowait:
             uri = '{}?nowait=1'.format(uri)
 
-        if PYVERSION == 3 and isinstance(data, str):
+        if isinstance(data, str):
             data = data.encode('utf-8')
 
         data = zlib.compress(data)
