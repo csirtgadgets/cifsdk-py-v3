@@ -3,7 +3,7 @@ import requests
 import time
 import json
 from cifsdk.exceptions import AuthError, TimeoutError, NotFound, SubmissionFailed, InvalidSearch, CIFBusy
-from cifsdk.constants import VERSION
+from cifsdk.constants import VERSION, PYVERSION
 from pprint import pprint
 import zlib
 from base64 import b64decode
@@ -16,6 +16,7 @@ import zlib
 requests.packages.urllib3.disable_warnings()
 
 TRACE = os.environ.get('CIFSDK_CLIENT_HTTP_TRACE')
+TIMEOUT = os.getenv('CIFSDK_CLIENT_HTTP_TIMEOUT', 120)
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ if TRACE:
 
 class HTTP(Client):
 
-    def __init__(self, remote, token, proxy=None, timeout=300, verify_ssl=True, **kwargs):
+    def __init__(self, remote, token, proxy=None, timeout=int(TIMEOUT), verify_ssl=True, **kwargs):
         super(HTTP, self).__init__(remote, token, **kwargs)
 
         self.proxy = proxy
@@ -50,29 +51,30 @@ class HTTP(Client):
             raise InvalidSearch(r['message'])
 
         if resp.status_code == 401:
-            raise AuthError()
+            raise AuthError('unauthorized')
 
         if resp.status_code == 404:
-            raise NotFound()
+            raise NotFound('not found')
 
         if resp.status_code == 408:
-            raise TimeoutError()
+            raise TimeoutError('timeout')
 
         if resp.status_code == 422:
             msg = json.loads(resp.text)
             raise SubmissionFailed(msg['message'])
 
         if resp.status_code == 503:
-            raise CIFBusy()
+            raise CIFBusy('system busy')
 
         if resp.status_code != expect:
-            raise RuntimeError(resp.content)
+            msg = 'unknown: %s' % resp.content
+            raise RuntimeError(msg)
 
     def _get(self, uri, params={}):
         if not uri.startswith('http'):
             uri = self.remote + uri
 
-        resp = self.session.get(uri, params=params, verify=self.verify_ssl)
+        resp = self.session.get(uri, params=params, verify=self.verify_ssl, timeout=self.timeout)
 
         self._check_status(resp, expect=200)
 
@@ -109,12 +111,16 @@ class HTTP(Client):
         if self.nowait:
             uri = '{}?nowait=1'.format(uri)
 
+        if PYVERSION == 3 and isinstance(data, str):
+            data = data.encode('utf-8')
+
         data = zlib.compress(data)
         headers = {
             'Content-Encoding': 'deflate'
         }
-        resp = self.session.post(uri, data=data, verify=self.verify_ssl, headers=headers)
+        resp = self.session.post(uri, data=data, verify=self.verify_ssl, headers=headers, timeout=self.timeout)
 
+        logger.debug(resp.content)
         self._check_status(resp, expect=201)
 
         return json.loads(resp.content.decode('utf-8'))
@@ -127,7 +133,7 @@ class HTTP(Client):
         if params.get('limit'):
             del params['limit']
 
-        resp = self.session.delete(uri, data=json.dumps(params), verify=self.verify_ssl)
+        resp = self.session.delete(uri, data=json.dumps(params), verify=self.verify_ssl, timeout=self.timeout)
         self._check_status(resp)
         return json.loads(resp.content.decode('utf-8'))
 
