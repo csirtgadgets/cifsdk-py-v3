@@ -23,7 +23,7 @@ FIREBALL_SIZE = int(FIREBALL_SIZE)
 
 logger = logging.getLogger(__name__)
 
-TRACE = os.environ.get('CIFSDK_CLIENT_ZEROMQ_TRACE')
+TRACE = os.getenv('CIFSDK_CLIENT_ZEROMQ_TRACE') or os.getenv('CIFSDK_CLIENT_ZMQ_TRACE')
 
 logger = logging.getLogger(__name__)
 
@@ -142,6 +142,10 @@ class ZMQ(Client):
         self.response = []
 
         self.loop.add_handler(self.socket, self._handle_message_fireball, zmq.POLLIN)
+
+        if PYVERSION == 3:
+            if isinstance(data, bytes):
+                data = data.decode('utf-8')
 
         data = json.loads(data)
 
