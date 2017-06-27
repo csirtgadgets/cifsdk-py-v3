@@ -67,6 +67,9 @@ def main():
     o = read_config(args)
     options = vars(args)
     for v in options:
+        if v == 'remote' and options[v] == REMOTE_ADDR and o.get('remote'):
+            options[v] = o['remote']
+
         if options[v] is None:
             options[v] = o.get(v)
 
