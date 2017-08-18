@@ -21,7 +21,10 @@ class Dummy(Client):
 
         return data
 
-    def indicators_search(self, data, decode=True):
+    def indicators_search(self, data, decode=True, test_data=[], test_wl=[]):
+        if len(test_data) > 0:
+            return test_data
+
         if type(data) == dict:
             data = [data]
 
