@@ -82,6 +82,9 @@ class HTTP(Client):
         s = (int(resp.headers['Content-Length']) / 1024 / 1024)
         logger.info('processing %.2f megs' % s)
 
+        if not data:
+            return {'data': []}
+
         msgs = json.loads(data.decode('utf-8'))
 
         if not msgs.get('status') and not msgs.get('message') == 'success':
@@ -190,5 +193,13 @@ class HTTP(Client):
     def tokens_edit(self, data):
         rv = self._patch('{}/tokens'.format(self.remote), data)
         return rv['data']
+
+    def stats(self, filters, start=None, end=None):
+        filters['start'] = start
+        filters['end'] = end
+
+        rv = self._get('{}/stats'.format(self.remote), params=filters)
+        return rv['data']
+
 
 Plugin = HTTP

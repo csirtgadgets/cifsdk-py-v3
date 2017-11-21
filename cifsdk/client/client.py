@@ -98,6 +98,8 @@ def main():
     p.add_argument('--delete', action='store_true')
     p.add_argument('--id')
 
+    p.add_argument('--stats', action="store_true")
+
     args = p.parse_args()
 
     setup_logging(args)
@@ -127,6 +129,13 @@ def main():
             verify_ssl = False
 
         cli = HTTPClient(args.remote, args.token, verify_ssl=verify_ssl)
+
+    if options.get('stats'):
+        logger.debug('getting stats..')
+        rv = cli.stats({})
+
+        logger.info('success id: {}'.format(rv))
+        raise SystemExit
 
     if options.get('ping') or options.get('ping_indef'):
         logger.info('running ping')

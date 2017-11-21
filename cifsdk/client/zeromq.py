@@ -199,4 +199,7 @@ class ZMQ(Client):
 
         return self._send(Msg.INDICATORS_DELETE, data)
 
+    def stats(self, filters):
+        return self._send(Msg.STATS, json.dumps(filters))
+
 Plugin = ZMQ
