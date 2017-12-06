@@ -3,19 +3,24 @@ import requests
 import time
 import json
 from cifsdk.exceptions import AuthError, TimeoutError, NotFound, SubmissionFailed, InvalidSearch, CIFBusy
-from cifsdk.constants import VERSION, PYVERSION
+from cifsdk.constants import VERSION
 from pprint import pprint
-import zlib
 from base64 import b64decode
-import binascii
 from cifsdk.client.plugin import Client
 import os
 import zlib
+from time import sleep
+import random
 
 requests.packages.urllib3.disable_warnings()
 
 TRACE = os.environ.get('CIFSDK_CLIENT_HTTP_TRACE')
 TIMEOUT = os.getenv('CIFSDK_CLIENT_HTTP_TIMEOUT', 120)
+RETRIES = os.getenv('CIFSDK_CLIENT_HTTP_RETRIES', 5)
+RETRIES_DELAY = os.getenv('CIFSDK_CLIENT_HTTP_RETRIES_DELAY', '30,60')
+
+s, e = RETRIES_DELAY.split(',')
+RETRIES_DELAY = random.uniform(int(s), int(e))
 
 logger = logging.getLogger(__name__)
 
@@ -62,20 +67,42 @@ class HTTP(Client):
             msg = json.loads(resp.text)
             raise SubmissionFailed(msg['message'])
 
-        if resp.status_code == 503:
-            raise CIFBusy('system busy')
+        if resp.status_code == 429:
+            raise CIFBusy('RateLimit exceeded')
+
+        if resp.status_code in [500, 501, 502, 503, 504]:
+            raise CIFBusy('system seems busy..')
 
         if resp.status_code != expect:
             msg = 'unknown: %s' % resp.content
             raise RuntimeError(msg)
 
-    def _get(self, uri, params={}):
+    def _get(self, uri, params={}, retry=True):
         if not uri.startswith('http'):
             uri = self.remote + uri
 
         resp = self.session.get(uri, params=params, verify=self.verify_ssl, timeout=self.timeout)
+        n = RETRIES
+        try:
+            self._check_status(resp, expect=200)
+            n = 0
+        except Exception as e:
+            if resp.status_code == 429 or resp.status_code in [500, 501, 502, 503, 504]:
+                logger.error(e)
+            else:
+                raise e
 
-        self._check_status(resp, expect=200)
+        while n != 0:
+            logger.info('setting random retry interval to spread out the load')
+            logger.info('retrying in %.00fs' % RETRIES_DELAY)
+            sleep(RETRIES_DELAY)
+
+            resp = self.session.get(uri, params=params, verify=self.verify_ssl, timeout=self.timeout)
+            if resp.status_code == 200:
+                break
+
+            if n == 0:
+                raise CIFBusy('system seems busy.. try again later')
 
         data = resp.content
 
@@ -116,7 +143,27 @@ class HTTP(Client):
         resp = self.session.post(uri, data=data, verify=self.verify_ssl, headers=headers, timeout=self.timeout)
 
         logger.debug(resp.content)
-        self._check_status(resp, expect=201)
+        n = RETRIES
+        try:
+            self._check_status(resp, expect=201)
+            n = 0
+        except Exception as e:
+            if resp.status_code == 429 or resp.status_code in [500, 501, 502, 503, 504]:
+                logger.error(e)
+            else:
+                raise e
+
+        while n != 0:
+            logger.info('setting random retry interval to spread out the load')
+            logger.info('retrying in %.00fs' % RETRIES_DELAY)
+            sleep(RETRIES_DELAY)
+
+            resp = self.session.post(uri, data=data, verify=self.verify_ssl, headers=headers, timeout=self.timeout)
+            if resp.status_code in [200, 201]:
+                break
+
+            if n == 0:
+                raise CIFBusy('system seems busy.. try again later')
 
         return json.loads(resp.content.decode('utf-8'))
 
