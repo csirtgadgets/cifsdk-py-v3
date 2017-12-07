@@ -133,16 +133,20 @@ def main():
         n = 4
         if args.ping_indef:
             n = 999
-        for num in range(0, n):
-            ret = cli.ping()
-            if ret != 0:
-                print("roundtrip: {} ms".format(ret))
-                select.select([], [], [], 1)
-                from time import sleep
-                sleep(1)
-            else:
-                logger.error('ping failed')
-                raise RuntimeError
+
+        try:
+            for num in range(0, n):
+                ret = cli.ping()
+                if ret != 0:
+                    print("roundtrip: {} ms".format(ret))
+                    select.select([], [], [], 1)
+                    from time import sleep
+                    sleep(1)
+                else:
+                    logger.error('ping failed')
+                    raise RuntimeError
+        except KeyboardInterrupt:
+            pass
         raise SystemExit
 
     if options.get("submit"):
@@ -211,9 +215,6 @@ def main():
 
         if not filters.get('confidence'):
             filters['confidence'] = 8
-
-        if not filters.get('reporttime') and not filters.get('day') and not filters.get('hour'):
-            filters['days'] = FEED_DAYS_LIMIT
 
         if args.limit == SEARCH_LIMIT:
             filters['limit'] = FEED_LIMIT
