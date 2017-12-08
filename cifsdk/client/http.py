@@ -114,7 +114,7 @@ class HTTP(Client):
         logger.info('processing %.2f megs' % s)
 
         msgs = json.loads(data.decode('utf-8'))
-        
+
         if msgs['data'] == '{}':
             msgs['data'] = []
 
