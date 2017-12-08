@@ -216,6 +216,8 @@ def main():
         if not filters.get('confidence'):
             filters['confidence'] = 8
 
+
+
         if args.limit == SEARCH_LIMIT:
             filters['limit'] = FEED_LIMIT
 
