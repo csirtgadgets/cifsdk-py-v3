@@ -1,10 +1,12 @@
-import os.path
-import tempfile
-import sys
-
 from ._version import get_versions
 VERSION = get_versions()['version']
 del get_versions
+
+import os.path
+import tempfile
+import sys
+from csirtg_indicator.constants import COLUMNS
+
 
 TEMP_DIR = os.path.join(tempfile.gettempdir())
 RUNTIME_PATH = os.environ.get('CIF_RUNTIME_PATH', TEMP_DIR)
@@ -42,8 +44,7 @@ PYVERSION = 2
 if sys.version_info > (3,):
     PYVERSION = 3
 
-COLUMNS = ['tlp', 'lasttime', 'reporttime', 'count', 'itype', 'indicator', 'cc', 'asn', 'asn_desc', 'confidence',
-           'description', 'tags', 'rdata', 'provider']
+COLUMNS = COLUMNS
 
 #COLUMNS = ['firsttime', 'lasttime', 'reporttime', 'count', 'itype', 'indicator', 'msg']
 MAX_FIELD_SIZE = 30

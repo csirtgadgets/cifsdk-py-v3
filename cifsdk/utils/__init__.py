@@ -15,6 +15,9 @@ def read_config(args):
         with open(args.config) as f:
             config = yaml.load(f)
 
+        if not config:
+            return options
+
         if config.get('client'):
             config = config['client']
         f.close()

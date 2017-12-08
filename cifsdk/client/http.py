@@ -3,7 +3,7 @@ import requests
 import time
 import json
 from cifsdk.exceptions import AuthError, TimeoutError, NotFound, SubmissionFailed, InvalidSearch, CIFBusy
-from cifsdk.constants import VERSION
+from cifsdk.constants import VERSION, PYVERSION
 from pprint import pprint
 from base64 import b64decode
 from cifsdk.client.plugin import Client
@@ -11,6 +11,10 @@ import os
 import zlib
 from time import sleep
 import random
+
+if PYVERSION == 3:
+    basestring = (str, bytes)
+
 
 requests.packages.urllib3.disable_warnings()
 
@@ -24,7 +28,7 @@ RETRIES_DELAY = random.uniform(int(s), int(e))
 
 logger = logging.getLogger(__name__)
 
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.WARNING)
 logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.ERROR)
 
 if TRACE:
@@ -93,8 +97,8 @@ class HTTP(Client):
                 raise e
 
         while n != 0:
-            logger.info('setting random retry interval to spread out the load')
-            logger.info('retrying in %.00fs' % RETRIES_DELAY)
+            logger.warning('setting random retry interval to spread out the load')
+            logger.warning('retrying in %.00fs' % RETRIES_DELAY)
             sleep(RETRIES_DELAY)
 
             resp = self.session.get(uri, params=params, verify=self.verify_ssl, timeout=self.timeout)
@@ -110,6 +114,13 @@ class HTTP(Client):
         logger.info('processing %.2f megs' % s)
 
         msgs = json.loads(data.decode('utf-8'))
+
+        if msgs['data'] == '{}':
+            msgs['data'] = []
+
+        if isinstance(msgs['data'], basestring) and msgs['data'].startswith('{"hits":{"hits":[{"_source":'):
+            msgs['data'] = json.loads(msgs['data'])
+            msgs['data'] = [r['_source'] for r in msgs['data']['hits']['hits']]
 
         if not msgs.get('status') and not msgs.get('message') == 'success':
             raise RuntimeError(msgs)
