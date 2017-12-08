@@ -63,7 +63,7 @@ class ZMQ(Client):
         if data['data'] == '{}':
             return []
 
-        if data['data'].startswith('{"hits":{"hits":[{"_source":'):
+        if isinstance(data['data'], basestring) and data['data'].startswith('{"hits":{"hits":[{"_source":'):
             data['data'] = json.loads(data['data'])
             data['data'] = [r['_source'] for r in data['data']['hits']['hits']]
 
