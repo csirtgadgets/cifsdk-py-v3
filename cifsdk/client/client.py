@@ -216,8 +216,6 @@ def main():
         if not filters.get('confidence'):
             filters['confidence'] = 8
 
-
-
         if args.limit == SEARCH_LIMIT:
             filters['limit'] = FEED_LIMIT
 
@@ -254,6 +252,7 @@ def main():
 
     else:
         print(FORMATS[options.get('format')](data=rv, cols=args.columns.split(',')))
+
 
 if __name__ == "__main__":
     main()

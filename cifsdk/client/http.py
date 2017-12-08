@@ -3,7 +3,7 @@ import requests
 import time
 import json
 from cifsdk.exceptions import AuthError, TimeoutError, NotFound, SubmissionFailed, InvalidSearch, CIFBusy
-from cifsdk.constants import VERSION
+from cifsdk.constants import VERSION, PYVERSION
 from pprint import pprint
 from base64 import b64decode
 from cifsdk.client.plugin import Client
@@ -11,6 +11,10 @@ import os
 import zlib
 from time import sleep
 import random
+
+if PYVERSION == 3:
+    basestring = (str, bytes)
+
 
 requests.packages.urllib3.disable_warnings()
 
@@ -110,6 +114,13 @@ class HTTP(Client):
         logger.info('processing %.2f megs' % s)
 
         msgs = json.loads(data.decode('utf-8'))
+        
+        if msgs['data'] == '{}':
+            msgs['data'] = []
+
+        if isinstance(msgs['data'], basestring) and msgs['data'].startswith('{"hits":{"hits":[{"_source":'):
+            msgs['data'] = json.loads(msgs['data'])
+            msgs['data'] = [r['_source'] for r in msgs['data']['hits']['hits']]
 
         if not msgs.get('status') and not msgs.get('message') == 'success':
             raise RuntimeError(msgs)

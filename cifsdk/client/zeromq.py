@@ -56,6 +56,7 @@ class ZMQ(Client):
             return data
 
         data = json.loads(data)
+
         if isinstance(data.get('data'), bool):
             return data['data']
 
