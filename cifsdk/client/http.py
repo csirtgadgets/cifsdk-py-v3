@@ -24,7 +24,7 @@ RETRIES_DELAY = random.uniform(int(s), int(e))
 
 logger = logging.getLogger(__name__)
 
-logger.setLevel(logging.ERROR)
+logger.setLevel(logging.WARNING)
 logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.ERROR)
 
 if TRACE:
@@ -93,8 +93,8 @@ class HTTP(Client):
                 raise e
 
         while n != 0:
-            logger.info('setting random retry interval to spread out the load')
-            logger.info('retrying in %.00fs' % RETRIES_DELAY)
+            logger.warning('setting random retry interval to spread out the load')
+            logger.warning('retrying in %.00fs' % RETRIES_DELAY)
             sleep(RETRIES_DELAY)
 
             resp = self.session.get(uri, params=params, verify=self.verify_ssl, timeout=self.timeout)

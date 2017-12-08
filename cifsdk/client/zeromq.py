@@ -56,6 +56,10 @@ class ZMQ(Client):
             return data
 
         data = json.loads(data)
+        # is this a straight up elasticsearch string?
+        if data['data'].startswith('{"hits":{"hits":[{"_source":'):
+            data['data'] = json.loads(data['data'])
+            data['data'] = [r['_source'] for r in data['data']['hits']['hits']]
 
         if data.get('message') == 'unauthorized':
             raise AuthError()
@@ -68,6 +72,9 @@ class ZMQ(Client):
 
         if data.get('status') != 'success':
             raise RuntimeError(data.get('message'))
+
+        if not data.get('data'):
+            raise RuntimeError('invalid response')
 
         try:
             data['data'] = zlib.decompress(data['data'])
