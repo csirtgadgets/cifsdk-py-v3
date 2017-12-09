@@ -69,7 +69,7 @@ class ZMQ(Client):
         if data.get('status') != 'success':
             raise RuntimeError(data.get('message'))
 
-        if not data.get('data'):
+        if data.get('data') is None:
             raise RuntimeError('invalid response')
 
         if isinstance(data.get('data'), bool):
