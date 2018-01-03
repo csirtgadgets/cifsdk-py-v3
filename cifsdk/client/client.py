@@ -94,6 +94,7 @@ def main():
     p.add_argument('--rdata')
     p.add_argument('--no-feed', action='store_true')
     p.add_argument('--region')
+    p.add_argument('--groups', help='specify groups filter (csv)')
 
     p.add_argument('--delete', action='store_true')
     p.add_argument('--id')
@@ -172,7 +173,8 @@ def main():
         'cc': options.get('cc'),
         'region': options.get('region'),
         'rdata': options.get('rdata'),
-        'reporttime': options.get('reporttime')
+        'reporttime': options.get('reporttime'),
+        'groups': options.get('groups')
     }
 
     if args.last_day:
