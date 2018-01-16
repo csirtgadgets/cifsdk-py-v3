@@ -146,6 +146,19 @@ def main():
             t.add_row(l)
             print(t)
 
+    elif options.get('delete_token'):
+        try:
+            rv = cli.tokens_delete({
+                'token': options.get('delete_token'),
+                'username': options.get('username')
+            })
+            if rv:
+                logger.info('deleted: {} tokens successfully'.format(rv))
+            else:
+                logger.error('no tokens deleted')
+        except Exception as e:
+            logger.error('token delete failed: %s' % e)
+
     elif options.get('delete'):
         if not (options.get('delete_token') or options.get('username')):
             raise RuntimeError('--delete requires --delete-token or --username')
