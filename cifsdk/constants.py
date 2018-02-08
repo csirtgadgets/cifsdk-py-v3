@@ -15,7 +15,7 @@ RUNTIME_PATH = os.path.join(RUNTIME_PATH)
 # Logging stuff
 LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s][%(threadName)s] - %(message)s'
 
-LOGLEVEL = 'INFO'
+LOGLEVEL = 'ERROR'
 LOGLEVEL = os.environ.get('CIF_LOGLEVEL', LOGLEVEL).upper()
 
 CONFIG_PATH = os.environ.get('CIF_CONFIG_PATH', os.path.join(os.getcwd(), 'cif.yml'))

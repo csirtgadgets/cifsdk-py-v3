@@ -153,11 +153,11 @@ def main():
         raise SystemExit
 
     if options.get("submit"):
-        logger.info("submitting {0}".format(options.get("submit")))
+        print("submitting {0}".format(options.get("submit")))
         i = Indicator(indicator=args.indicator, tags=args.tags, confidence=args.confidence)
         rv = cli.indicators_create(i)
 
-        logger.info('success id: {}'.format(rv))
+        print('success id: {}\n'.format(rv))
         raise SystemExit
 
     filters = {
@@ -202,19 +202,19 @@ def main():
             filters = {'id': args.id}
 
         filters = {f: filters[f] for f in filters if filters.get(f)}
-        logger.info("deleting {0}".format(filters))
+        print("deleting {0}".format(filters))
         rv = cli.indicators_delete(filters)
 
-        logger.info('deleted: {}'.format(rv))
+        print('deleted: {}'.format(rv))
         raise SystemExit
 
     if options.get('feed'):
         if not filters.get('itype') and not ADVANCED:
-            logger.error('missing --itype')
+            print('\nmissing --itype\n\n')
             raise SystemExit
 
         if not filters.get('tags') and not ADVANCED:
-            logger.error('missing --tags [phishing|malware|botnet|scanner|pdns|whitelist|...]')
+            print('\nmissing --tags [phishing|malware|botnet|scanner|pdns|whitelist|...]\n\n')
             raise SystemExit
 
         if not filters.get('confidence'):
