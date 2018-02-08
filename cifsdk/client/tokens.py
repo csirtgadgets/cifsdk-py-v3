@@ -40,6 +40,8 @@ def main():
     p.add_argument('--delete-token', help='specify the token to delete')
 
     p.add_argument('--username', help='specify username')
+    p.add_argument('--name', help='specify username')
+
     p.add_argument('--admin', action='store_true')
     p.add_argument('--expires', help='set a token expiration timestamp')
     p.add_argument('--read', help='set the token read flag', action='store_true')
@@ -84,6 +86,9 @@ def main():
 
     from cifsdk.client.http import HTTP as HTTPClient
     cli = HTTPClient(args.remote, args.token, verify_ssl=verify_ssl)
+
+    if options.get('name'):
+        options['username'] = options['name']
 
     rv = False
     if options.get('create'):
