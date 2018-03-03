@@ -32,8 +32,8 @@ setup(
     cmdclass=versioneer.get_cmdclass(),
     description="CIFv3 SDK",
     long_description="Software Development Kit for CIFv3",
-    url="https://github.com/csirtgadgets/bearded-avenger-sdk",
-    license='LGPL3',
+    url="https://github.com/csirtgadgets/bearded-avenger-sdk-py",
+    license='MPLv2',
     classifiers=[
                "Topic :: System :: Networking",
                "Environment :: Other Environment",

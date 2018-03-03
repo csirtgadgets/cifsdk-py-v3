@@ -1,5 +1,0 @@
-cifsdk (%VERSION%-%RELEASE%~%DIST%) %DIST%; urgency=low
-
-  * %VERSION% release
-
- -- CSIRT Gadgets Foundation. <https://github.com/csirtgadgets/bearded-avenger-sdk-py/issues>  %DATE%

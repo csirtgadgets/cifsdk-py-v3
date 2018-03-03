@@ -7,6 +7,9 @@ import tempfile
 import sys
 from csirtg_indicator.constants import COLUMNS
 
+PYVERSION = 2
+if sys.version_info > (3,):
+    PYVERSION = 3
 
 TEMP_DIR = os.path.join(tempfile.gettempdir())
 RUNTIME_PATH = os.environ.get('CIF_RUNTIME_PATH', TEMP_DIR)
@@ -39,12 +42,5 @@ FORMAT = os.environ.get('CIF_FORMAT', 'table')
 
 ADVANCED = os.getenv('CIF_ADVANCED')
 
-
-PYVERSION = 2
-if sys.version_info > (3,):
-    PYVERSION = 3
-
 COLUMNS = COLUMNS
-
-#COLUMNS = ['firsttime', 'lasttime', 'reporttime', 'count', 'itype', 'indicator', 'msg']
 MAX_FIELD_SIZE = 30
