@@ -151,6 +151,8 @@ class HTTP(Client):
         headers = {
             'Content-Encoding': 'deflate'
         }
+
+
         resp = self.session.post(uri, data=data, verify=self.verify_ssl, headers=headers, timeout=self.timeout)
 
         logger.debug(resp.content)
