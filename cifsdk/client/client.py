@@ -236,7 +236,7 @@ def main():
             logger.error(e)
 
         else:
-            print(FORMATS[options.get('format')](data=rv))
+            print(FORMATS[options.get('format')](data=rv, cols=args.columns.split(',')))
 
         raise SystemExit
 
