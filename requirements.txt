@@ -4,6 +4,6 @@ pyaml>=15.03.1
 pyzmq>=15.4.0,<16.1
 requests>=2.6.0,<2.15
 urllib3>=1.10.2
-csirtg_indicator>=1.0.0<2.0
+csirtg_indicator>=1.0.0,<2.0
 msgpack-python>=0.4.8,<0.5.0
 ujson>=1.35,<2.0
