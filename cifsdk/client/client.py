@@ -71,7 +71,8 @@ def main():
     p.add_argument('--tags', nargs='+')
     p.add_argument('--provider')
     p.add_argument('--confidence', help="specify confidence level")
-
+    p.add_argument('--tlp', help="specify traffic light protocol")
+    
     p.add_argument("--zmq", help="use zmq as a transport instead of http", action="store_true")
 
     p.add_argument('--config', help='specify config file [default %(default)s]', default=CONFIG_PATH)
@@ -154,7 +155,7 @@ def main():
 
     if options.get("submit"):
         print("submitting {0}".format(options.get("submit")))
-        i = Indicator(indicator=args.indicator, tags=args.tags, confidence=args.confidence, group=args.group)
+        i = Indicator(indicator=args.indicator, tags=args.tags, confidence=args.confidence, group=args.group, tlp=args.tlp)
         rv = cli.indicators_create(i)
 
         print('success id: {}\n'.format(rv))
@@ -174,7 +175,8 @@ def main():
         'region': options.get('region'),
         'rdata': options.get('rdata'),
         'reporttime': options.get('reporttime'),
-        'groups': options.get('groups')
+        'groups': options.get('groups'),
+        'tlp': options.get('tlp')
     }
 
     if args.last_day:
