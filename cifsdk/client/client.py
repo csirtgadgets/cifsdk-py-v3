@@ -155,7 +155,7 @@ def main():
 
     if options.get("submit"):
         print("submitting {0}".format(options.get("submit")))
-        i = Indicator(indicator=args.indicator, tags=args.tags, confidence=args.confidence, group=args.group, tlp=args.tlp, provider=args.provider)
+        i = Indicator(indicator=args.indicator, tags=args.tags, confidence=args.confidence, group=args.groups, tlp=args.tlp, provider=args.provider)
         rv = cli.indicators_create(i)
 
         print('success id: {}\n'.format(rv))
