@@ -3,7 +3,7 @@ import requests
 import time
 import json
 from cifsdk.exceptions import AuthError, TimeoutError, NotFound, SubmissionFailed, InvalidSearch, CIFBusy
-from cifsdk.constants import VERSION, PYVERSION
+from cifsdk.constants import VERSION, PYVERSION, TOKEN
 from pprint import pprint
 from base64 import b64decode
 from cifsdk.client.plugin import Client
@@ -38,7 +38,7 @@ if TRACE:
 
 class HTTP(Client):
 
-    def __init__(self, remote, token, proxy=None, timeout=int(TIMEOUT), verify_ssl=True, **kwargs):
+    def __init__(self, remote, token=TOKEN, proxy=None, timeout=int(TIMEOUT), verify_ssl=True, **kwargs):
         super(HTTP, self).__init__(remote, token, **kwargs)
 
         self.proxy = proxy
