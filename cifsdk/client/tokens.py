@@ -73,6 +73,9 @@ def main():
         if v == 'remote' and options[v] == REMOTE_ADDR and o.get('remote'):
             options[v] = o['remote']
 
+        if v == 'token' and o.get('token'):
+            options[v] = o['token']
+
         if options[v] is None:
             options[v] = o.get(v)
 
