@@ -88,6 +88,7 @@ def main():
     p.add_argument('--days', help='filter results within last X days')
     p.add_argument('--today', help='auto-sets reporttime to today, 00:00:00Z (UTC)', action='store_true')
     p.add_argument('--columns', help='specify output columns [default %(default)s]', default=','.join(COLUMNS))
+    p.add_argument('--fields', help='same as --columns [default %(default)s]', default=','.join(COLUMNS))
 
     p.add_argument('--asn')
     p.add_argument('--cc')
@@ -101,6 +102,9 @@ def main():
     p.add_argument('--id')
 
     args = p.parse_args()
+
+    if args.fields != ','.join(COLUMNS):
+        args.columns = args.fields
 
     setup_logging(args)
     logger = logging.getLogger(__name__)
