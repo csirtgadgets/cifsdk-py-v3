@@ -115,17 +115,17 @@ class HTTP(Client):
 
         msgs = json.loads(data.decode('utf-8'))
 
-        if msgs['data'] == '{}':
+        if msgs.get('data') and msgs['data'] == '{}':
             msgs['data'] = []
 
-        if isinstance(msgs['data'], basestring) and msgs['data'].startswith('{"hits":{"hits":[{"_source":'):
+        if msgs.get('data') and isinstance(msgs['data'], basestring) and msgs['data'].startswith('{"hits":{"hits":[{"_source":'):
             msgs['data'] = json.loads(msgs['data'])
             msgs['data'] = [r['_source'] for r in msgs['data']['hits']['hits']]
 
         if not msgs.get('status') and not msgs.get('message') == 'success':
             raise RuntimeError(msgs)
 
-        if msgs.get('status') and msgs['status'] == 'failure':
+        if msgs.get('status') and msgs['status'] == 'failed':
             raise InvalidSearch(msgs['message'])
 
         if isinstance(msgs.get('data'), list):
