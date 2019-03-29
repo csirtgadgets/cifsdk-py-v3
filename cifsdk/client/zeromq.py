@@ -38,7 +38,7 @@ if PYVERSION == 3:
 
 class ZMQ(Client):
     def __enter__(self):
-        return
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.socket.close()
