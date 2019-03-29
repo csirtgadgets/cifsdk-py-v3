@@ -37,6 +37,13 @@ if PYVERSION == 3:
 
 
 class ZMQ(Client):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.socket.close()
+        self.context.term()
+
     def __init__(self, remote, token, **kwargs):
         super(ZMQ, self).__init__(remote, token)
 
@@ -100,10 +107,13 @@ class ZMQ(Client):
         Msg(mtype=mtype, token=self.token, data=data).send(self.socket)
 
         if self.nowait or nowait:
+            self.socket.close()
             logger.debug('not waiting for a resp')
             return
 
-        return self._recv(decode=decode)
+        rv = self._recv(decode=decode)
+        self.socket.close()
+        return rv
 
     def ping(self, write=False):
         if write:
@@ -185,6 +195,7 @@ class ZMQ(Client):
 
         logger.debug("starting loop to receive")
         self.loop.start()
+        self.loop.close()
         self.socket.close()
         return self.response
 
