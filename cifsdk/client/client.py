@@ -72,7 +72,7 @@ def main():
     p.add_argument('--provider')
     p.add_argument('--confidence', help="specify confidence level")
     p.add_argument('--tlp', help="specify traffic light protocol")
-    
+
     p.add_argument("--zmq", help="use zmq as a transport instead of http", action="store_true")
 
     p.add_argument('--config', help='specify config file [default %(default)s]', default=CONFIG_PATH)
@@ -111,6 +111,13 @@ def main():
 
     o = read_config(args)
     options = vars(args)
+
+    # support for separate read and write tokens
+    if o.get('write_token') and options.get('submit'):
+	    o['token'] = o['write_token']
+    elif o.get('read_token'):
+        o['token'] = o['read_token']
+
     for v in options:
         if v == 'remote' and options[v] == REMOTE_ADDR and o.get('remote'):
             options[v] = o['remote']
