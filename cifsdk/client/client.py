@@ -108,6 +108,8 @@ def main():
 
     setup_logging(args)
     logger = logging.getLogger(__name__)
+    if args:
+        from cifsdk.utils import color
 
     o = read_config(args)
     options = vars(args)
