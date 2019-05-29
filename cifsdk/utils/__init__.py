@@ -3,7 +3,6 @@ import logging
 from cifsdk.constants import LOG_FORMAT, RUNTIME_PATH, LOGLEVEL, VERSION
 from argparse import ArgumentParser
 import signal
-from . import color
 
 import yaml
 import os
