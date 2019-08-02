@@ -58,6 +58,7 @@ def main():
     p.add_argument('--token', help='specify api token', default=TOKEN)
     p.add_argument('--remote', help='specify API remote [default %(default)s]', default=REMOTE_ADDR)
     p.add_argument('-p', '--ping', action="store_true")  # meg?
+    p.add_argument('--ping-write', action="store_true")
     p.add_argument('--ping-indef', action="store_true")
     p.add_argument('-q', '--search', help="search")
     p.add_argument('--itype', help='filter by indicator type')  ## need to fix sqlite for non-ascii stuff first
@@ -115,7 +116,7 @@ def main():
     options = vars(args)
 
     # support for separate read and write tokens
-    if o.get('write_token') and options.get('submit'):
+    if o.get('write_token') and (options.get('submit') or options.get('ping_write')):
 	    o['token'] = o['write_token']
     elif o.get('read_token'):
         o['token'] = o['read_token']
@@ -145,15 +146,19 @@ def main():
 
         cli = HTTPClient(args.remote, args.token, verify_ssl=verify_ssl)
 
-    if options.get('ping') or options.get('ping_indef'):
+    if options.get('ping') or options.get('ping_indef') or options.get('ping_write'):
         logger.info('running ping')
         n = 4
         if args.ping_indef:
             n = 999
 
+        write = False
+        if options.get('ping_write'):
+            write = True
+
         try:
             for num in range(0, n):
-                ret = cli.ping()
+                ret = cli.ping(write=write)
                 if ret != 0:
                     print("roundtrip: {} ms".format(ret))
                     select.select([], [], [], 1)
