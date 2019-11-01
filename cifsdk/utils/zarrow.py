@@ -19,12 +19,15 @@ def parse_timestamp(ts):
 
         return t
     except ValueError as e:
+        if len(ts) == 10:
+            t = arrow.get(ts, 'X')
+            return t
         if len(ts) == 14:
             match = re.search('^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$', ts)
             if match:
                 ts = '{}-{}-{}T{}:{}:{}Z'.format(match.group(1), match.group(2), match.group(3), match.group(4),
                                                  match.group(5), match.group(6))
-                t = arrow.get(ts, 'YYYY-MM-DDTHH:mm:ss')
+                t = arrow.get(ts, ['YYYY-MM-DDTHH:mm:ss', 'YYYY-MM-DDTHH:mm:ssZ'])
                 return t
             else:
                 raise RuntimeError('Invalid Timestamp: %s' % ts)
