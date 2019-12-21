@@ -193,9 +193,9 @@ class HTTP(Client):
         return json.loads(resp.content.decode('utf-8'))
 
     def _patch(self, uri, data):
-        resp = self.session.patch(uri, data=json.dumps(data))
+        resp = self.session.patch(uri, data=json.dumps(data), verify=self.verify_ssl, timeout=self.timeout)
         self._check_status(resp)
-        return json.loads(resp.content)
+        return json.loads(resp.content.decode('utf-8'))
 
     def indicators_search(self, filters):
         rv = self._get('/search', params=filters)
