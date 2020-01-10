@@ -117,7 +117,7 @@ def main():
 
     # support for separate read and write tokens
     if o.get('write_token') and (options.get('submit') or options.get('ping_write')):
-	    o['token'] = o['write_token']
+        o['token'] = o['write_token']
     elif o.get('read_token'):
         o['token'] = o['read_token']
 
