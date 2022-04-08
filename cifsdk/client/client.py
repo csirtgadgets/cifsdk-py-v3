@@ -145,9 +145,11 @@ def main():
     for v in options:
         if v == 'remote' and options[v] == REMOTE_ADDR and o.get('remote'):
             options[v] = o['remote']
-        if v == 'token' and o.get('token'):
+        elif v == 'token' and o.get('token'):
             options[v] = o['token']
-        if options[v] is None or options[v] == '':
+        elif v == 'nolog' and o.get('nolog'):
+            options[v] = o['nolog']
+        elif options[v] is None or options[v] == '':
             options[v] = o.get(v)
 
     if not options.get('token'):
