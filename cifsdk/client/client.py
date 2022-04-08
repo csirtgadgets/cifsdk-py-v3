@@ -149,6 +149,8 @@ def main():
             options[v] = o['token']
         elif v == 'nolog' and o.get('nolog'):
             options[v] = o['nolog']
+        elif v == 'relatives' and o.get('find_relatives'):
+            options[v] = o['find_relatives']
         elif options[v] is None or options[v] == '':
             options[v] = o.get(v)
 
