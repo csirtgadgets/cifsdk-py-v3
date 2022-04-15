@@ -6,6 +6,7 @@ import select
 import textwrap
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
+from argparse import Action as argparse_action
 
 from cifsdk.constants import CONFIG_PATH, REMOTE_ADDR, TOKEN, SEARCH_LIMIT, FORMAT, FEED_LIMIT, FEED_DAYS_LIMIT, \
     COLUMNS, ADVANCED
@@ -18,6 +19,19 @@ import arrow
 
 logger = logging.getLogger(__name__)
 
+# argparse keyvalue class
+# https://www.geeksforgeeks.org/python-key-value-pair-using-argparse/
+class KeyValueParser(argparse_action):
+    # Constructor calling
+    def __call__( self , parser, namespace,
+                 values, option_string = None):
+        setattr(namespace, self.dest, dict())
+
+        for value in values:
+            # split it into key and value
+            key, value = value.split('=')
+            # assign into dictionary
+            getattr(namespace, self.dest)[key] = value
 
 class Client(object):
 
@@ -88,19 +102,26 @@ def main():
                                                             ' hour and reporttime-end to end of previous full hour')
     p.add_argument('--days', help='filter results within last X days')
     p.add_argument('--today', help='auto-sets reporttime to today, 00:00:00Z (UTC)', action='store_true')
+    p.add_argument('--sort', help='specify field name(s) and direction(s) to sort server-side during search [default "-reporttime,-lasttime" ]')
     p.add_argument('--columns', help='specify output columns [default %(default)s]', default=','.join(COLUMNS))
     p.add_argument('--fields', help='same as --columns [default %(default)s]', default=','.join(COLUMNS))
 
-    p.add_argument('--asn')
+    p.add_argument('--asn', type=int, help='ASN as integer, e.g., ASN15169 --asn 15169')
     p.add_argument('--cc')
     p.add_argument('--asn-desc')
     p.add_argument('--rdata')
     p.add_argument('--no-feed', action='store_true')
     p.add_argument('--region')
     p.add_argument('--groups', help='specify groups filter (csv)')
+    p.add_argument('-r', '--relatives', help='include relatives when searching by indicator (e.g., parent/child CIDRs)', action='store_true')
 
     p.add_argument('--delete', action='store_true')
     p.add_argument('--id')
+
+    p.add_argument('--extras', nargs='*', action=KeyValueParser, help='any additional space-separated key=value pairs'
+                                                                ' to pass with request. can be used for parameters not'
+                                                                ' explicitly supported by this cli,'
+                                                                ' e.g., --extras key1=value1 key2=value2,value3' )
 
     args = p.parse_args()
 
@@ -124,9 +145,13 @@ def main():
     for v in options:
         if v == 'remote' and options[v] == REMOTE_ADDR and o.get('remote'):
             options[v] = o['remote']
-        if v == 'token' and o.get('token'):
+        elif v == 'token' and o.get('token'):
             options[v] = o['token']
-        if options[v] is None or options[v] == '':
+        elif v == 'nolog' and o.get('nolog'):
+            options[v] = o['nolog']
+        elif v == 'relatives' and o.get('find_relatives'):
+            options[v] = o['find_relatives']
+        elif options[v] is None or options[v] == '':
             options[v] = o.get(v)
 
     if not options.get('token'):
@@ -194,8 +219,13 @@ def main():
         'rdata': options.get('rdata'),
         'reporttime': options.get('reporttime'),
         'groups': options.get('groups'),
-        'tlp': options.get('tlp')
+        'tlp': options.get('tlp'),
+        'find_relatives': options['relatives'],
+        'sort': options.get('sort'),
     }
+
+    if args.extras:
+        filters.update(args.extras)
 
     if args.last_day:
         filters['days'] = '1'
