@@ -2,7 +2,7 @@ arrow>=0.15.2
 PyYAML>=4.2b1
 prettytable>=0.7.2
 pyaml>=18
-pyzmq>=24.0
+pyzmq==23.2.1
 requests>=2.20
 urllib3>=1.10.2
 csirtg_indicator>=1.0.9,<2.0
